@@ -1,0 +1,1340 @@
+defaults:
+  name:
+    value: constant-diameter reference manifold
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.compute_trays:
+    value: 18
+    units: configuration / dimensionless
+    category: NVIDIA
+    source: architecture
+    url: https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+    notes: "agent.md \xA72"
+  rack.switch_trays:
+    value: 9
+    units: configuration / dimensionless
+    category: NVIDIA
+    source: architecture
+    url: https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+    notes: "agent.md \xA72"
+  rack.layout:
+    value:
+    - C01
+    - C02
+    - C03
+    - C04
+    - C05
+    - C06
+    - C07
+    - C08
+    - C09
+    - S01
+    - S02
+    - S03
+    - S04
+    - S05
+    - S06
+    - S07
+    - S08
+    - S09
+    - C10
+    - C11
+    - C12
+    - C13
+    - C14
+    - C15
+    - C16
+    - C17
+    - C18
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.elevations_m:
+    value: null
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.flow_LPM:
+    value: 120
+    units: L/min
+    category: ASSUMPTION
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: Selected equal to CDU rated point
+  rack.supply_C:
+    value: 40
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.operating_mode:
+    value: fixed_flow
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.gravity_enabled:
+    value: true
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  rack.gravity_m_s2:
+    value: 9.80665
+    units: "m/s\xB2"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coolant.type:
+    value: PG25
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coolant.property_file:
+    value: data/coolant_properties.csv
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coolant.viscosity_multiplier:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  power.gpu_W_each:
+    value: 1200
+    units: W
+    category: NVIDIA
+    source: power
+    url: https://docs.nvidia.com/mission-control/docs/systems-administration-guide/2.2.0/prs/faq.html
+    notes: Maximum power budget, not workload measurement
+  power.gpus_per_compute_tray:
+    value: 4
+    units: configuration / dimensionless
+    category: NVIDIA
+    source: architecture
+    url: https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+    notes: Published topology
+  power.grace_cpu_W_each:
+    value: 500
+    units: W
+    category: DERIVED
+    source: power
+    url: https://docs.nvidia.com/mission-control/docs/systems-administration-guide/2.2.0/prs/faq.html
+    notes: (5800-4*1200)/2; allocated budget
+  power.cpus_per_compute_tray:
+    value: 2
+    units: configuration / dimensionless
+    category: NVIDIA
+    source: architecture
+    url: https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+    notes: Published topology
+  power.switch_rack_total_W:
+    value: 11160
+    units: W
+    category: NVIDIA
+    source: switch
+    url: https://docs.nvidia.com/datacenter/dps/versions/0.8/guides/runbooks/maxlps-simple-mode-pilot/
+    notes: Static aggregate power recommendation
+  power.compute_fraction:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  power.switch_fraction:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  power.compute_aux_W:
+    value: 0
+    units: W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  power.switch_aux_W:
+    value: 0
+    units: W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  power.tray_heat_W:
+    value: null
+    units: W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.height_m:
+    value: 1.8
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.roughness_m:
+    value: 1.5e-06
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.supply.profile:
+    value: constant
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.supply.inlet_m:
+    value: 0.038
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.supply.outlet_m:
+    value: 0.038
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.supply.exponent:
+    value: 1.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.supply.pieces_m:
+    value:
+    - 0.038
+    - 0.032
+    - 0.025
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.return.profile:
+    value: constant
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.return.inlet_m:
+    value: 0.038
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.return.outlet_m:
+    value: 0.038
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.return.exponent:
+    value: 1.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  geometry.return.pieces_m:
+    value:
+    - 0.025
+    - 0.032
+    - 0.038
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.diameter_m:
+    value: 0.008
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.tube_length_m:
+    value: 1.5
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.tube_multiplier:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.coldplate_K:
+    value: 5500000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.qdc_K:
+    value: 2300000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.compute.restriction_K:
+    value: 0.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.diameter_m:
+    value: 0.006
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.tube_length_m:
+    value: 1.0
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.tube_multiplier:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.coldplate_K:
+    value: 20000000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.qdc_K:
+    value: 5000000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.switch.restriction_K:
+    value: 0.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  branches.overrides:
+    value: {}
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.header.tee:
+    value: 0.08
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.header.entrance:
+    value: 0.2
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.header.exit:
+    value: 0.2
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.header.reducer:
+    value: 0.05
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.header.expansion:
+    value: 0.05
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.tee:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.entrance:
+    value: 0.5
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.exit:
+    value: 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.bend:
+    value: 1.2
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.fittings:
+    value: 0.5
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.valve:
+    value: 0.3
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  loss_coefficients.branch.orifice:
+    value: 0.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  external.enabled:
+    value: false
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  external.length_m:
+    value: 12.0
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  external.diameter_m:
+    value: 0.04
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  external.minor_K:
+    value: 8.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  external.equipment_K:
+    value: 3000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.mode:
+    value: in_rack
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.reference:
+    value: Vertiv CoolChip CDU121-like
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.capacity_W:
+    value: 121000
+    units: W
+    category: OEM
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: At stated 4 K approach and nominal flow
+  cdu.nominal_flow_LPM:
+    value: 120
+    units: L/min
+    category: OEM
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: Rated flow, not an independently verified maximum
+  cdu.available_dp_Pa:
+    value: 115000
+    units: Pa
+    category: OEM
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: External available head; excludes internal CDU losses
+  cdu.approach_K:
+    value: 4
+    units: K
+    category: OEM
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: Rated approach, not full UA map
+  cdu.shutoff_dp_Pa:
+    value: 160000
+    units: Pa
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.speed:
+    value: 1.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.efficiency:
+    value: 0.6
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.served_racks:
+    value: 1
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.secondary_min_C:
+    value: null
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.secondary_max_C:
+    value: null
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  cdu.nominal_electric_W:
+    value: 875
+    units: W
+    category: OEM
+    source: cdu
+    url: https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf
+    notes: Whole CDU rating, not rack pumping prediction
+  facility.supply_C:
+    value: 36
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  facility.flow_LPM:
+    value: 150
+    units: L/min
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  facility.coolant:
+    value: water
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  facility.max_return_C:
+    value: 60
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  facility.hx_model:
+    value: rating_scaled
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.pressure_tolerance_Pa:
+    value: 0.05
+    units: Pa
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.mass_relative_tolerance:
+    value: 1.0e-08
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.energy_relative_tolerance:
+    value: 1.0e-08
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.temperature_tolerance_K:
+    value: 0.0001
+    units: K
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.flow_relative_tolerance:
+    value: 1.0e-06
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.max_property_iterations:
+    value: 60
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.max_nfev:
+    value: 200
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  solver.relaxation:
+    value: 0.65
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  constraints.rack_flow_max_LPM:
+    value: 130
+    units: L/min
+    category: OEM
+    source: qct
+    url: https://blog.qct.io/wp-content/uploads/2025/04/QCT-Qoolrack-Stand-Alone_Advanced-Liquid-Cooling-for-NVIDIA-GB200-NVL72-Systems.pdf
+    notes: QCT implementation envelope
+  constraints.supply_max_C:
+    value: 45
+    units: "\xB0C"
+    category: OEM
+    source: qct
+    url: https://blog.qct.io/wp-content/uploads/2025/04/QCT-Qoolrack-Stand-Alone_Advanced-Liquid-Cooling-for-NVIDIA-GB200-NVL72-Systems.pdf
+    notes: QCT implementation maximum
+  constraints.return_max_C:
+    value: 65
+    units: "\xB0C"
+    category: OEM
+    source: qct
+    url: https://blog.qct.io/wp-content/uploads/2025/04/QCT-Qoolrack-Stand-Alone_Advanced-Liquid-Cooling-for-NVIDIA-GB200-NVL72-Systems.pdf
+    notes: QCT implementation maximum
+  constraints.branch_outlet_max_C:
+    value: 65
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  constraints.header_velocity_max_m_s:
+    value: 3.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  constraints.diameter_min_m:
+    value: 0.015
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  constraints.diameter_max_m:
+    value: 0.05
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  constraints.soft_penalty:
+    value: 1000
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.enabled:
+    value: false
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.channels:
+    value: 100
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.channel_width_m:
+    value: 0.001
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.channel_height_m:
+    value: 0.001
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.length_m:
+    value: 0.08
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.heated_area_m2:
+    value: 0.03
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.tim_K_W:
+    value: 0.0002
+    units: K/W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.spreader_K_W:
+    value: 0.0002
+    units: K/W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.plate_K_W:
+    value: 0.0002
+    units: K/W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  coldplate.laminar_Nu:
+    value: 4.36
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.target:
+    value: heat_proportional
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.seed:
+    value: 72
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.maxiter:
+    value: 35
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.global_maxiter:
+    value: 8
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.population_size:
+    value: 5
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.normalization.temperature_K:
+    value: 20
+    units: K
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.normalization.pressure_Pa:
+    value: 115000
+    units: Pa
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.normalization.pump_W:
+    value: 400
+    units: W
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.normalization.volume_m3:
+    value: 0.004
+    units: "m\xB3"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.weights.flow_error:
+    value: 1.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.weights.temperature_spread:
+    value: 0.05
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.weights.pressure:
+    value: 0.02
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.weights.pump:
+    value: 0.02
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.weights.size:
+    value: 0.015
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.bounds.diameter_m:
+    value:
+    - 0.025
+    - 0.05
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.bounds.taper_ratio:
+    value:
+    - 0.6
+    - 1.0
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.bounds.restriction_K:
+    value:
+    - 0.0
+    - 200000000.0
+    units: Pa/(kg/s)^2
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  optimization.bounds.flow_LPM:
+    value:
+    - 90
+    - 130
+    units: L/min
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.samples:
+    value: 32
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.seed:
+    value: 720
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.coldplate_multiplier:
+    value:
+    - 0.7
+    - 1.3
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.qdc_multiplier:
+    value:
+    - 0.7
+    - 1.3
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.tubing_multiplier:
+    value:
+    - 0.7
+    - 1.3
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.restriction_multiplier:
+    value:
+    - 0.7
+    - 1.3
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.compute_load_multiplier:
+    value:
+    - 0.75
+    - 1.0
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.switch_load_multiplier:
+    value:
+    - 0.8
+    - 1.2
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.supply_C:
+    value:
+    - 25
+    - 45
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.flow_LPM:
+    value:
+    - 90
+    - 130
+    units: L/min
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.viscosity_multiplier:
+    value:
+    - 0.9
+    - 1.1
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.coolants:
+    value:
+    - water
+    - PG25
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.roughness_m:
+    value:
+    - 1.0e-06
+    - 5.0e-05
+    units: m
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  uncertainty.efficiency:
+    value:
+    - 0.5
+    - 0.8
+    units: '1'
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  plots.dpi:
+    value: 180
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: Engineering baseline assumption
+    url: null
+    notes: User-editable modeling/design/numerical input; not a measured NVIDIA value.
+  liquid_reference_W:
+    value: 115560
+    units: W
+    category: DERIVED
+    source: power
+    url: https://docs.nvidia.com/mission-control/docs/systems-administration-guide/2.2.0/prs/faq.html
+    notes: 18*5800 + 11160; assumes entire allocated primary silicon heat enters coolant
+  nominal_liquid_W:
+    value: 102000
+    units: W
+    category: DERIVED
+    source: architecture
+    url: https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+    notes: 120 kW *85%; separate historical envelope, not mixed with primary case
+  HPE_rack_W:
+    value: 132000
+    units: W
+    category: OEM
+    source: agent.md
+    url: null
+    notes: "agent.md \xA73 HPE: 115 kW liquid and 17 kW air"
+  HPE_liquid_W:
+    value: 115000
+    units: W
+    category: OEM
+    source: agent.md
+    url: null
+    notes: Separate OEM envelope
+  HPE_air_W:
+    value: 17000
+    units: W
+    category: OEM
+    source: agent.md
+    url: null
+    notes: Residual air heat excluded from liquid network
+  OCP_flow_clue_LPM:
+    value: 5
+    units: L/min
+    category: OCP
+    source: agent.md
+    url: null
+    notes: Scope ambiguous; not a universal per-tray specification
+  GF_technical_loop_Pa:
+    value: 232000
+    units: Pa
+    category: 3P
+    source: gf
+    url: https://www.datacenter-forum.com/georg-fischer/high-performance-polymers-in-secondary-fluid-network-applications-slide-deck/download
+    notes: Broader technical loop; not bare rack or NVIDIA specification
+  GF_fractions:
+    value:
+      coldplates: 52
+      qdcs: 22.2
+      tubing: 12.5
+      equipment: 7.7
+      fittings: 2.9
+      pipes: 1.9
+      valves: 1.0
+      manifold: 0.14
+    units: '%'
+    category: 3P
+    source: gf
+    url: https://www.datacenter-forum.com/georg-fischer/high-performance-polymers-in-secondary-fluid-network-applications-slide-deck/download
+    notes: Rounded fractions; validation compares categories without automatic fitting
+  XDU1350_two_pumps:
+    value:
+      capacity_W: 1368000
+      flow_LPM: 1200
+      external_dp_Pa: 244000
+      power_W: 13700
+    units: SI / named fields
+    category: OEM
+    source: agent.md
+    url: null
+    notes: "agent.md \xA712; aggregate, shared across racks"
+  XDU1350_three_pumps:
+    value:
+      flow_LPM: 1800
+      external_dp_Pa: 198000
+      power_W: 20500
+    units: SI / named fields
+    category: OEM
+    source: agent.md
+    url: null
+    notes: Alternative three-pump rating, not same pump curve
+  XDU1350_temperature_C:
+    value:
+    - 10
+    - 52
+    units: "\xB0C"
+    category: OEM
+    source: agent.md
+    url: null
+    notes: Conservatively applied to secondary supply and return
+  PG25_40C:
+    value:
+      rho: 1020
+      cp: 4120
+      mu: 0.00147
+      k: 0.476
+    units: SI
+    category: 3P
+    source: agent.md
+    url: null
+    notes: "agent.md \xA78 reference table"
+  PG25_50C:
+    value:
+      rho: 1015
+      cp: 4130
+      mu: 0.00115
+    units: SI
+    category: 3P
+    source: agent.md
+    url: null
+    notes: "agent.md \xA78 reference table"
+  PG25_extension:
+    value:
+      rho_slope: -0.5
+      cp_slope: 1.0
+      k_slope: 0.0009
+    units: SI/K
+    category: ESTIMATE
+    source: agent.md
+    url: https://www.dow.com/en-us/pdp.dowfrost-lc-25-heat-transfer-fluid.497419z.html
+    notes: "rho/cp linearly continued; log(mu) continued from 40/50\xB0C anchors.\
+      \ k slope assumed. 5\u201395\xB0C range is numerical, not qualified hardware\
+      \ envelope."
+  water_table:
+    value: IAPWS97 at 0.1 MPa, 5 K grid
+    units: SI
+    category: DERIVED
+    source: agent.md
+    url: https://iapws.org/relguide/IF97-Rev.html
+    notes: Generated using iapws 1.5.5; see studies/build_property_table.py
+  inrow.name:
+    value: XDU1350-like eight-rack extended loop
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.rack.supply_C:
+    value: 38
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.external.enabled:
+    value: true
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.cdu.mode:
+    value: in_row
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.cdu.reference:
+    value: Vertiv XDU1350-like two pumps / eight identical racks
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.cdu.capacity_W:
+    value: 1368000
+    units: W
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.cdu.nominal_flow_LPM:
+    value: 1200
+    units: L/min
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.cdu.available_dp_Pa:
+    value: 244000
+    units: Pa
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.cdu.shutoff_dp_Pa:
+    value: 330000
+    units: Pa
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.cdu.served_racks:
+    value: 8
+    units: configuration / dimensionless
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.cdu.secondary_min_C:
+    value: 10
+    units: "\xB0C"
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.cdu.secondary_max_C:
+    value: 52
+    units: "\xB0C"
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.cdu.nominal_electric_W:
+    value: 13700
+    units: W
+    category: OEM
+    source: Vertiv XDU1350, agent.md section 12
+    url: https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+    notes: Two-pump aggregate rating; secondary temperature range conservatively applied
+      at both ends
+  inrow.facility.flow_LPM:
+    value: 1200
+    units: L/min
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+  inrow.facility.supply_C:
+    value: 34
+    units: "\xB0C"
+    category: ASSUMPTION
+    source: In-row design selection
+    url: null
+    notes: Editable overlay assumption; 38 C supply chosen for return-temperature
+      margin; eight identical racks.
+source_urls_from_agent:
+- https://blog.qct.io/wp-content/uploads/2025/04/QCT-Qoolrack-Stand-Alone_Advanced-Liquid-Cooling-for-NVIDIA-GB200-NVL72-Systems.pdf
+- https://buy.hpe.com/us/en/compute/rack-scale-system/nvidia-nvl-system/nvidia-gb200-nvl72-by-hpe/p/1014890104
+- https://developer.nvidia.com/blog/?p=90182
+- https://docs.nvidia.com/datacenter/dps/versions/0.8/guides/runbooks/maxlps-simple-mode-pilot/
+- https://docs.nvidia.com/dgx-superpod/reference-architecture-scalable-infrastructure-gb200/latest/dgx-superpod-components.html
+- https://docs.nvidia.com/dgx/dgxgb200-user-guide/
+- https://docs.nvidia.com/dgx/dgxgb200-user-guide/dgxgb200-user-guide.pdf
+- https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+- https://docs.nvidia.com/mission-control/docs/systems-administration-guide/2.2.0/prs/faq.html
+- https://docs.nvidia.com/mission-control/docs/systems-administration-guide/2.2.0/prs/faq.html"
+- https://docs.nvidia.com/multi-node-nvlink-systems/multi-node-tuning-guide/system.html
+- https://docs.nvidia.com/multi-node-nvlink-systems/partition-guide-v1-2.pdf
+- https://www.datacenter-forum.com/georg-fischer/high-performance-polymers-in-secondary-fluid-network-applications-slide-deck/download
+- https://www.dell.com/en-us/dt/corporate/newsroom/announcements/detailpage.press-releases~usa~2024~10~dell-servers-storage-at-ocp.htm
+- https://www.dell.com/support/manuals/en-us/poweredge-xe9712/pe_ir9048_ism_pub/coolant-distribution-unit-cdu
+- https://www.dell.com/support/manuals/en-us/poweredge-xe9712/xe9712_ism/Cooling-specifications
+- https://www.hpe.com/psnow/generateDDS/NVIDIA%20GB200%20NVL72%20by%20HPE%20data%20sheet-PSN1014890104IEEN.pdf
+- https://www.nvidia.com/en-us/data-center/gb200-nvl72/
+- https://www.opencompute.org/documents/ocp-open-systems-for-ai-whitepaper-v1-0-0-final-pdf
+- https://www.servethehome.com/inside-the-dell-factory-that-builds-ai-factories/
+- https://www.servethehome.com/inside-the-dell-factory-that-builds-ai-factories/3/
+- https://www.servethehome.com/liteon-shows-nvidia-gb200-nvl72-rack-at-ocp-summit-2024/
+- https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+- https://www.vertiv.com/499c46/globalassets/products/thermal-management/high-density-solutions/liebert-xdu-coolant-distribution-units/liebert-xdu1350-coolant-distribution-unitcdu-ds-en-na-sl-70799-web.pdf
+- https://www.vertiv.com/4a1be9/globalassets/shared/vertiv-coolchip-cdu-100_datasheet_en.pdf

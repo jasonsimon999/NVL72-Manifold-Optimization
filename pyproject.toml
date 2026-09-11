@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "nvl72-manifold"
+version = "0.1.0"
+description = "Public-data-grounded NVL72-class thermal hydraulic design tool"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "scipy>=1.11", "pandas>=2", "matplotlib>=3.8", "PyYAML>=6"]
+[project.optional-dependencies]
+dashboard = ["streamlit>=1.35"]
+test = ["pytest>=8"]
+[project.scripts]
+nvl72 = "nvl72.cli:main"
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+[tool.setuptools.data-files]
+"share/nvl72/config" = ["config/baseline.yaml", "config/cdu121.yaml", "config/inrow.yaml", "config/optimized_example.yaml"]
+"share/nvl72/data" = ["data/coolant_properties.csv", "data/sources.yaml", "data/component_defaults.yaml"]

@@ -1,0 +1,127 @@
+name: constant-diameter reference manifold
+rack:
+  compute_trays: 18
+  switch_trays: 9
+  layout: [C01, C02, C03, C04, C05, C06, C07, C08, C09, S01, S02, S03, S04, S05, S06, S07, S08, S09, C10, C11, C12, C13, C14, C15, C16, C17, C18]
+  elevations_m: null  # null: evenly spaced over height; geometry assumption
+  flow_LPM: 120
+  supply_C: 40
+  operating_mode: fixed_flow
+  gravity_enabled: true
+  gravity_m_s2: 9.80665
+coolant:
+  type: PG25
+  property_file: data/coolant_properties.csv
+  viscosity_multiplier: 1.0
+power:
+  gpu_W_each: 1200
+  gpus_per_compute_tray: 4
+  grace_cpu_W_each: 500
+  cpus_per_compute_tray: 2
+  switch_rack_total_W: 11160
+  compute_fraction: 1.0
+  switch_fraction: 1.0
+  compute_aux_W: 0
+  switch_aux_W: 0
+  tray_heat_W: null
+geometry:
+  height_m: 1.8
+  roughness_m: 0.0000015
+  supply: {profile: constant, inlet_m: 0.038, outlet_m: 0.038, exponent: 1.0, pieces_m: [0.038, 0.032, 0.025]}
+  return: {profile: constant, inlet_m: 0.038, outlet_m: 0.038, exponent: 1.0, pieces_m: [0.025, 0.032, 0.038]}
+  # Endpoints follow FLOW direction: supply bottom->top, return top->bottom.
+branches:
+  compute: {diameter_m: 0.008, tube_length_m: 1.5, tube_multiplier: 1.0, coldplate_K: 5500000.0, qdc_K: 2300000.0, restriction_K: 0.0}
+  switch: {diameter_m: 0.006, tube_length_m: 1.0, tube_multiplier: 1.0, coldplate_K: 20000000.0, qdc_K: 5000000.0, restriction_K: 0.0}
+  # Reduced K units Pa/(kg/s)^2. Deliberate estimates, NOT measured curves.
+  overrides: {}
+loss_coefficients:
+  header: {tee: 0.08, entrance: 0.2, exit: 0.2, reducer: 0.05, expansion: 0.05}
+  branch: {tee: 1.0, entrance: 0.5, exit: 1.0, bend: 1.2, fittings: 0.5, valve: 0.3, orifice: 0.0}
+external:
+  enabled: false
+  length_m: 12.0
+  diameter_m: 0.04
+  minor_K: 8.0
+  equipment_K: 3000.0
+cdu:
+  mode: in_rack
+  reference: Vertiv CoolChip CDU121-like
+  capacity_W: 121000
+  nominal_flow_LPM: 120
+  available_dp_Pa: 115000
+  approach_K: 4
+  shutoff_dp_Pa: 160000  # ASSUMPTION: one rated point does not define a pump curve
+  speed: 1.0
+  efficiency: 0.6
+  served_racks: 1
+  secondary_min_C: null
+  secondary_max_C: null
+  nominal_electric_W: 875  # informational, NOT modeled pump power
+facility:
+  supply_C: 36
+  flow_LPM: 150
+  coolant: water
+  max_return_C: 60
+  hx_model: rating_scaled
+  # Screening capacity = rating * min(1, actual/rated cold-end approach,
+  # actual/rated TCS heat-capacity rate). Not a manufacturer derating curve.
+solver:
+  pressure_tolerance_Pa: 0.05
+  mass_relative_tolerance: 1.0e-8
+  energy_relative_tolerance: 1.0e-8
+  temperature_tolerance_K: 0.0001
+  flow_relative_tolerance: 1.0e-6
+  max_property_iterations: 60
+  max_nfev: 200
+  relaxation: 0.65
+constraints:
+  rack_flow_max_LPM: 130
+  supply_max_C: 45
+  return_max_C: 65
+  branch_outlet_max_C: 65
+  header_velocity_max_m_s: 3.0
+  diameter_min_m: 0.015
+  diameter_max_m: 0.05
+  soft_penalty: 1000
+coldplate:
+  enabled: false
+  channels: 100
+  channel_width_m: 0.001
+  channel_height_m: 0.001
+  length_m: 0.08
+  heated_area_m2: 0.03
+  tim_K_W: 0.0002
+  spreader_K_W: 0.0002
+  plate_K_W: 0.0002
+  laminar_Nu: 4.36
+optimization:
+  target: heat_proportional
+  seed: 72
+  maxiter: 35
+  global_maxiter: 8
+  population_size: 5
+  normalization: {temperature_K: 20, pressure_Pa: 115000, pump_W: 400, volume_m3: 0.004}
+  weights: {flow_error: 1.0, temperature_spread: 0.05, pressure: 0.02, pump: 0.02, size: 0.015}
+  bounds:
+    diameter_m: [0.025, 0.05]
+    taper_ratio: [0.6, 1.0]
+    restriction_K: [0.0, 200000000.0]
+    flow_LPM: [90, 130]
+uncertainty:
+  samples: 32
+  seed: 720
+  coldplate_multiplier: [0.7, 1.3]
+  qdc_multiplier: [0.7, 1.3]
+  tubing_multiplier: [0.7, 1.3]
+  restriction_multiplier: [0.7, 1.3]
+  compute_load_multiplier: [0.75, 1.0]
+  switch_load_multiplier: [0.8, 1.2]
+  supply_C: [25, 45]
+  flow_LPM: [90, 130]
+  viscosity_multiplier: [0.9, 1.1]
+  coolants: [water, PG25]
+  roughness_m: [0.000001, 0.00005]
+  efficiency: [0.5, 0.8]
+plots:
+  dpi: 180

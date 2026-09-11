@@ -1,0 +1,35 @@
+category: ASSUMPTION
+notes: "Reference only; authoritative executable inputs are config/baseline.yaml.\
+  \ K is Pa/(kg/s)^2. Coefficients selected in the scale of agent.md \xA739, with\
+  \ separate unmeasured switch resistance."
+branches:
+  compute:
+    diameter_m: 0.008
+    tube_length_m: 1.5
+    tube_multiplier: 1.0
+    coldplate_K: 5500000.0
+    qdc_K: 2300000.0
+    restriction_K: 0.0
+  switch:
+    diameter_m: 0.006
+    tube_length_m: 1.0
+    tube_multiplier: 1.0
+    coldplate_K: 20000000.0
+    qdc_K: 5000000.0
+    restriction_K: 0.0
+  overrides: {}
+loss_coefficients:
+  header:
+    tee: 0.08
+    entrance: 0.2
+    exit: 0.2
+    reducer: 0.05
+    expansion: 0.05
+  branch:
+    tee: 1.0
+    entrance: 0.5
+    exit: 1.0
+    bend: 1.2
+    fittings: 0.5
+    valve: 0.3
+    orifice: 0.0

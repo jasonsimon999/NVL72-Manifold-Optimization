@@ -1,0 +1,16 @@
+extends: baseline.yaml
+name: XDU1350-like eight-rack extended loop
+rack: {supply_C: 38}
+external: {enabled: true}
+cdu:
+  mode: in_row
+  reference: Vertiv XDU1350-like two pumps / eight identical racks
+  capacity_W: 1368000
+  nominal_flow_LPM: 1200
+  available_dp_Pa: 244000
+  shutoff_dp_Pa: 330000
+  served_racks: 8
+  secondary_min_C: 10
+  secondary_max_C: 52
+  nominal_electric_W: 13700
+facility: {flow_LPM: 1200, supply_C: 34}
