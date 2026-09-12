@@ -5,3 +5,8 @@ matplotlib>=3.8
 PyYAML>=6
 pytest>=8
 streamlit==1.63.0
+# Install the scientific model as a real package for every Streamlit worker,
+# cache deserializer, and rerun. A dashboard-only sys.path edit is not enough.
+.
+# Match the Cloud safeguard reported in deployment logs.
+pyarrow<25

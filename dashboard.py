@@ -5,7 +5,9 @@ import sys
 # Cloud installs requirements.txt, not necessarily this src-layout package.
 # Resolve from this file so startup also works outside the repository directory.
 PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(PROJECT_ROOT / 'src'))
+SOURCE_ROOT = str(PROJECT_ROOT / 'src')
+if SOURCE_ROOT not in sys.path:
+    sys.path.insert(0, SOURCE_ROOT)
 
 from copy import deepcopy
 import pandas as pd

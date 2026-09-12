@@ -19,7 +19,7 @@ python -m pip install -r requirements.txt
 python run_app.py
 ```
 
-You can also select the `.venv` interpreter and press **F5 → Run manifold dashboard**. Streamlit Cloud's main file remains **dashboard.py**; the entrypoint resolves `src/nvl72` and its data paths directly. No package installation or `PYTHONPATH` setting is required for dashboard use. The commands below additionally install the scientific CLI for advanced studies.
+You can also select the `.venv` interpreter and press **F5 → Run manifold dashboard**. Streamlit Cloud's main file remains **dashboard.py**. Installing `requirements.txt` now also installs the model package through its `.` entry, so imports work in workers and interactive reruns as well as initial startup. No separate package-install command or `PYTHONPATH` setting is needed. After pushing this dependency change, reboot the Cloud app and check its build log for `nvl72-manifold==0.1.1` or newer.
 
 The dashboard now includes expandable derivations, water/PG25/EG50 comparisons, estimated chip-temperature intervals and configurable targets, independent facility-water controls, a design-summary CSV, and independently editable orifices at all 27 trays. Download the complete result JSON to retain the resolved configuration. New research and explicit defaults are documented in the September 12 addendum to [agent.md](agent.md).
 

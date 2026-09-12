@@ -41,7 +41,8 @@ Windows: create the environment with `py -3 -m venv .venv`, activate with `.venv
 1. Commit and push the updated files to your GitHub repository, including `dashboard.py`, `requirements.txt`, `src/nvl72/`, `config/`, and `data/`. Do not upload `.venv`.
 2. In Streamlit Community Cloud, select repository **jasonsimon999/NVL72-Manifold-Optimization**, the branch containing your changes (normally **main**), and main file **dashboard.py**. `run_app.py` is a local launcher, not the Cloud entrypoint.
 3. In advanced settings choose **Python 3.11**, the version used for this project's tests, and deploy. For an existing app, update/reboot it after the corrected commit reaches its selected branch.
-4. Cloud reads the root `requirements.txt`. The entrypoint adds its own `src` directory to Python's import path before importing `nvl72`, so it does not depend on a package installed on your laptop.
+4. Cloud reads the root `requirements.txt`. Its `.` entry installs this repository's `nvl72-manifold` package (import name `nvl72`) into Cloud's Python environment. Keep this line: dashboard-only path setup does not cover every worker/cache import. The entrypoint additionally resolves its own `src` folder for local development. PyArrow is capped below 25 to match the Cloud safeguard in the supplied logs.
+5. After this dependency fix is pushed, reboot the app to replace the running process and its caches. Check the build log for installation of `nvl72-manifold==0.1.1` or newer. The notice that both `requirements.txt` and `pyproject.toml` exist is expected: requirements selects the dependencies, and the `.` entry builds the model using pyproject metadata.
 
 See Streamlit's [dependency guidance](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies) and [deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
 
