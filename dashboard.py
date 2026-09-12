@@ -1,4 +1,12 @@
-"""Run: streamlit run dashboard.py (after editable package install)."""
+"""Streamlit Cloud entrypoint. Local shortcut: python run_app.py."""
+from pathlib import Path
+import sys
+
+# Cloud installs requirements.txt, not necessarily this src-layout package.
+# Resolve from this file so startup also works outside the repository directory.
+PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT / 'src'))
+
 from copy import deepcopy
 import pandas as pd
 import numpy as np
@@ -17,7 +25,7 @@ st.title('NVL72 manifold laboratory')
 st.caption('Public-data-grounded engineering model · assumed component hydraulics · not proprietary rack CAD')
 @st.cache_data
 def calculate(config): return solve(config)
-base_config=load_config()
+base_config=load_config(PROJECT_ROOT / 'config/baseline.yaml')
 with st.sidebar:
     st.header('Operating condition')
     flow=st.slider('Rack flow [L/min]',90.,130.,120.,1.)
@@ -40,7 +48,7 @@ with st.sidebar:
     metric=st.selectbox('Schematic color',['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'])
     if st.button('Show saved optimized result'):
         st.session_state['show_saved']=True
-c=load_config('config/inrow.yaml') if cdu=='in_row' else deepcopy(base_config)
+c=load_config(PROJECT_ROOT / 'config/inrow.yaml') if cdu=='in_row' else deepcopy(base_config)
 c['rack'].update(flow_LPM=flow,supply_C=supply,gravity_enabled=gravity,operating_mode=operating)
 c['coolant']['type']=coolant;c['facility'].update(supply_C=fw_supply,flow_LPM=fw_flow,design_deltaT_K=fw_rise,minimum_hot_pinch_K=fw_pinch)
 c['power'].update(compute_fraction=compute,switch_fraction=switch)
@@ -157,7 +165,7 @@ st.download_button('Download complete result and configuration',json.dumps(nativ
 if st.session_state.get('show_saved'):
     import json
     from pathlib import Path
-    path=Path('results/optimized.json')
+    path=PROJECT_ROOT / 'results/optimized.json'
     if path.exists():st.subheader('Saved optimized candidate');st.json(json.loads(path.read_text())['metrics'])
     else:st.info('Run the optimization study to create results/optimized.json.')
 with st.expander('Model limits'):

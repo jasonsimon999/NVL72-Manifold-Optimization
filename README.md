@@ -8,6 +8,19 @@ Start with [the computed engineering report](results/reports/engineering_report.
 
 ## Install and reproduce
 
+**Start here:** [Step-by-step VS Code and Streamlit Cloud instructions](docs/RUNNING.md).
+
+For the dashboard only, open this project folder in VS Code and run:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python run_app.py
+```
+
+You can also select the `.venv` interpreter and press **F5 → Run manifold dashboard**. Streamlit Cloud's main file remains **dashboard.py**; the entrypoint resolves `src/nvl72` and its data paths directly. No package installation or `PYTHONPATH` setting is required for dashboard use. The commands below additionally install the scientific CLI for advanced studies.
+
 The dashboard now includes expandable derivations, water/PG25/EG50 comparisons, estimated chip-temperature intervals and configurable targets, independent facility-water controls, a design-summary CSV, and independently editable orifices at all 27 trays. Download the complete result JSON to retain the resolved configuration. New research and explicit defaults are documented in the September 12 addendum to [agent.md](agent.md).
 
 EG50 is 50% ethylene glycol **by volume**, using Dow SR-1 typical properties over 10–120°C. It is not qualified for this CDU/material system. Chip resistances and the default 80°C ceiling are engineering assumptions, not manufacturer-defined optimal temperatures. Enter installed thermal limits and measured resistance data before treating a pass as performance evidence.
@@ -31,7 +44,7 @@ streamlit run dashboard.py
 
 The module equivalents `python -m nvl72 simulate`, `python -m nvl72.simulate`, `python -m nvl72.optimize`, `python -m nvl72.sweep` and `python -m nvl72.report` also work. Run from the project root so output/config paths resolve consistently. On restricted machines, set `MPLCONFIGDIR=/tmp/nvl72-mpl` for Matplotlib.
 
-For the environment created during this build, activate `.venv`; all required packages are installed. The normal wheel installation avoids macOS treating editable-install `.pth` files as hidden. If you edit Python source, reinstall with `python -m pip install . --no-build-isolation --no-deps` or run with `PYTHONPATH=src`; configuration changes need no reinstall. `requirements-lock.txt` captures the executed runtime. New installs need only project dependencies; `iapws` is optional for regenerating the checked-in water table.
+For the environment created during this build, activate `.venv`; all required packages are installed. The dashboard loads current code directly from `src`, so edits need no reinstall. For the separately installed scientific CLI, reinstall with `python -m pip install . --no-build-isolation --no-deps` after source changes, or run studies with `PYTHONPATH=src`. `requirements-lock.txt` is a historical runtime snapshot; use `requirements.txt` for dashboard installation and Cloud deployment. `iapws` is optional for regenerating the checked-in water table.
 
 A complete study runs sweeps before optimizing. It compares A (optimized constant ID), B (tapers), C (two restrictions), D (tapers + two restrictions + flow), E (analytical minimum-head location balancing at D geometry), and D116 (D at 116 LPM). Every one is compared against the **unchanged original constant-diameter reference**, not against an upgraded baseline. E is exact fixed-geometry sizing followed by an independent coupled solve; full continuous E search is also available through `nvl72 optimize --design E`.
 

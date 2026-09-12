@@ -2948,6 +2948,10 @@ That produces a rigorous, calculation-based, genuinely relevant AI-infrastructur
 
 ## Implementation research addendum — 2026-09-12
 
+### Deployment and local startup correction — 2026-09-12
+
+Streamlit Community Cloud installs declared dependencies, but the scientific package is located under `src/nvl72` and must be discoverable before importing it. `dashboard.py` now anchors `src`, configuration files and saved results to its own absolute directory. Keep this bootstrap before model imports; do not rely on a developer's installed wheel or `PYTHONPATH`. `run_app.py` starts Streamlit using the active interpreter; `.vscode/launch.json` provides F5 startup. `docs/RUNNING.md` is the primary beginner setup/deployment guide. The Cloud entrypoint remains `dashboard.py`, not the local launcher. Streamlit is pinned to the locally tested 1.63.0 in requirements and the dashboard extra. Python 3.11 is the tested Cloud selection. See [Cloud dependency handling](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies). An isolated-interpreter regression runs the dashboard outside the checkout and checks model origin, in-row configuration and saved results.
+
 Retain the original specification above as source history. This addendum defines the new implementation parameters and overrides any implication that a computed nominal pass establishes hardware qualification.
 
 ### EG50 coolant option
