@@ -1,0 +1,24 @@
+extends: optimized_example.yaml
+name: EG50 comparison at selected PG25 geometry
+coolant:
+  type: EG50
+# These thermal resistances and targets are engineering assumptions, not vendor limits.
+chip_temperature:
+  GPU:
+    resistance_range_K_W: [0.010, 0.020]
+    target_max_C: 80
+    manufacturer_limit_C: null
+  CPU:
+    resistance_range_K_W: [0.020, 0.040]
+    target_max_C: 80
+    manufacturer_limit_C: null
+  NVSwitch:
+    resistance_range_K_W: [0.015, 0.035]
+    target_max_C: 80
+    manufacturer_limit_C: null
+facility:
+  design_deltaT_K: 12
+  minimum_hot_pinch_K: 0
+cdu:
+  rating_coolant: PG25
+  rating_supply_C: 40

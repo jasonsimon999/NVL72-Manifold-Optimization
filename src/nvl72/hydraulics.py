@@ -31,6 +31,16 @@ def solve_network(c, branches, total_mass, supply_props, branch_props, return_pr
     g = c['rack']['gravity_m_s2'] if c['rack']['gravity_enabled'] else 0.0
     gs = supply_props.rho*g*dz; gr = return_props.rho*g*dz
     scale_m = total_mass/n
+    orifice_coeff = np.zeros(n)
+    for i,item in enumerate(branches):
+        bore=item.get('orifice_diameter_m')
+        if bore is None: continue
+        cd=item.get('orifice_Cd',.62); beta=bore/item['diameter_m']
+        if not 0 < beta < 1 or not 0 < cd <= 1:
+            raise ValueError('Orifice requires 0 < bore < branch ID and 0 < Cd <= 1')
+        # Thin-plate permanent loss, including downstream pressure recovery.
+        area=np.pi*bore**2/4
+        orifice_coeff[i]=(np.sqrt(1-beta**4*(1-cd**2))-cd*beta**2)**2/(2*branch_props.rho[i]*cd**2*area**2)
 
     def evaluate(m):
         # Exact continuity elimination: segment j carries branches j..n-1.
@@ -45,7 +55,8 @@ def solve_network(c, branches, total_mass, supply_props, branch_props, return_pr
             'tubing': bp['friction']*b['tube_multiplier'],
             'fittings': dynamic*sum(v for k,v in minor['branch'].items() if k not in ('valve','orifice')),
             'valves': dynamic*minor['branch']['valve'],
-            'restrictions': reduced_loss(m,b['restriction_K'])+dynamic*minor['branch']['orifice']}
+            'restrictions': reduced_loss(m,b['restriction_K'])+dynamic*minor['branch']['orifice'],
+            'orifices': reduced_loss(m,orifice_coeff)}
         for i, item in enumerate(branches):
             for component, key in [('coldplates','coldplate_curve'), ('qdcs','qdc_curve')]:
                 if key in item: losses[component][i] = curve_loss(m[i]/branch_props.rho[i],item[key])

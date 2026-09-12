@@ -2945,3 +2945,55 @@ The project should optimize manifold diameter/taper and branch restriction so th
 for a single-rack Vertiv CDU121-like system, or a larger pressure budget for an in-row CDU architecture.
 
 That produces a rigorous, calculation-based, genuinely relevant AI-infrastructure thermal-fluid design project.
+
+## Implementation research addendum — 2026-09-12
+
+Retain the original specification above as source history. This addendum defines the new implementation parameters and overrides any implication that a computed nominal pass establishes hardware qualification.
+
+### EG50 coolant option
+
+`EG50` means **50% ethylene glycol by volume**, with inhibited Dow DOWTHERM SR-1 properties as a proxy. It does not mean 50% by mass or 50% commercial concentrate. Source: Dow-authored product information, June 2002, Form 180-01312-602 AMS, page 2, [archived manufacturer datasheet](https://users.obs.carnegiescience.edu/crane/pfs/man/Misc/Dowtherm-SR-1.pdf), inspected 2026-09-12. These are typical properties, not guaranteed specifications.
+
+| Temperature °C | Density kg/m³ | cp J/(kg K) | Dynamic viscosity Pa s | Conductivity W/(m K) |
+|---|---|---|---|---|
+| 10 | 1078.72 | 3245 | 0.0055071 | 0.3724 |
+| 40 | 1064.91 | 3361 | 0.0022567 | 0.3937 |
+| 65 | 1050.05 | 3457 | 0.0012936 | 0.4062 |
+| 90 | 1032.15 | 3554 | 0.0008227 | 0.4139 |
+| 120 | 1006.66 | 3670 | 0.0005252 | 0.4168 |
+
+`studies/build_property_table.py` reproduces these anchors in the combined CSV. Density, cp and conductivity interpolate linearly; viscosity interpolates logarithmically. Enthalpy integrates interpolated cp exactly. EG50 property evaluation rejects temperatures outside 10–120°C; this mathematical table range is NOT an allowable rack or pressure-dependent boiling envelope. EG50 CDU, seals, inhibitor and material qualification remains **unverified**. The supplied CDU121 data does not establish EG50 support. Fixed component mass-flow resistance curves and chip resistances remain uncalibrated across coolants; fluid comparisons capture resolved hydraulic/property effects, not a validated cold-plate performance map.
+
+### Chip temperature and performance
+
+[NVIDIA Grace Power and Thermals](https://docs.nvidia.com/dccpu/grace-perf-tuning-guide/power-thermals.html), inspected 2026-09-12, directs users to installed CPU thermal-zone passive/critical trip points and GPU temperature telemetry (`nvidia-smi -q -d TEMPERATURE`). Do not invent a universal optimal GPU/CPU/NVSwitch temperature band. The application reports estimated junction intervals, headroom to an assumed design ceiling, and headroom to user-entered manufacturer limits when available. No entered limit means unknown, not automatic manufacturer compliance.
+
+New `chip_temperature` configuration defaults (all **ASSUMPTION**, not NVIDIA measurements):
+
+| Component key | `resistance_range_K_W` | `target_max_C` | `manufacturer_limit_C` |
+|---|---|---|---|
+| GPU | [0.010, 0.020] | 80 | null |
+| CPU | [0.020, 0.040] | 80 | null |
+| NVSwitch | [0.015, 0.035] | 80 | null |
+
+`Tj = tray outlet temperature + chip heat × total junction-to-coolant resistance`. Bounds are an engineering assumption envelope, not a confidence interval. Outlet coolant is a conservative reference; resistance must include package/interface/cold-plate effects. No flow dependence is inferred for these assumed resistances. Compute tray heat, including custom/auxiliary heat, is apportioned by configured GPU/CPU nameplate powers and counts; switch tray heat is divided over two ASICs. Default counts give 72 GPU, 36 CPU and 18 NVSwitch estimates grouped by tray/type. This conserves apportioned tray heat but does not resolve unequal device workloads. The older optional equivalent-tray channel model remains separate. A chip target failure now fails the nominal design screen. Hardware qualification remains unverified even when all entered constraints pass.
+
+### Facility water and HX
+
+New editable **ASSUMPTION** defaults: `facility.design_deltaT_K: 12`, `facility.minimum_hot_pinch_K: 0`, `cdu.rating_coolant: PG25`, `cdu.rating_supply_C: 40`. The 12 K design rise accommodates the original 150 L/min facility operating point; users can impose a tighter requirement. Existing facility return ceiling remains active. FWS supply and total CDU flow have independent dashboard controls; they no longer silently follow TCS supply. For an in-row CDU the flow and duty refer to all served racks.
+
+Facility heat balance uses exact enthalpy. Allowed FWS return is the smallest of FWS supply + design rise, return ceiling, and TCS return − minimum hot pinch. Required mass flow is aggregate rack heat divided by that allowable enthalpy rise; volume flow uses inlet density. No positive allowable rise yields no finite required flow. Maximum FWS supply is TCS supply − required approach. Required counterflow UA uses both terminal differences and logarithmic mean temperature difference; nonpositive terminal differences do not yield a valid positive UA. Aggregate duty excludes unmodeled pump/motor heat and ambient gains. Facility pump head, water treatment and equipment selection require site data.
+
+The rating screen now compares **mass flow × cp** to the PG25/40°C reference capacity rate, replacing the former calculation whose coolant density canceled and effectively compared volume flow only. This is a screening assumption, not an EG50 vendor HX rating. Capacity remains capped at the nominal rating and scaled by approach/capacity-rate ratios. Cold-end approach, hot-end pinch, return ceiling and the entered design-rise ceiling are checked independently.
+
+### Individual orifices and design evaluation
+
+Each branch class or `branches.overrides.<tray_id>` accepts `orifice_diameter_m` (null/absent disables) and `orifice_Cd` (assumed 0.62). Require 0 < bore < local tube ID and 0 < Cd <= 1. Let beta = bore/tube ID and Ao = pi bore²/4. Permanent loss is
+
+`dp = m|m| [sqrt(1-beta^4(1-Cd²))-Cd beta²]² / (2 rho Cd² Ao²)`.
+
+This incompressible thin-plate approximation includes pressure recovery, rather than treating pressure-tap differential as permanent loss. See [orifice loss research, Measurement (2025)](https://www.sciencedirect.com/science/article/abs/pii/S0263224125000466) and [ORNL velocity-of-approach relation](https://industrialresources.ornl.gov/measur/suite/docs/group__flow__calculations__adjusted__discharge__coefficient__formula). Small rack tubes and fixed Cd are not an ISO-certified meter implementation; calibrate bore, thickness, Reynolds dependence and downstream geometry before manufacturing. Added orifice loss is distinct from and additive to existing class/per-tray restrictions. Results expose bore, Cd and permanent loss per tray, plus its flow-weighted system-head contribution.
+
+`config/orifice_example.yaml` illustrates two different bores and is explicitly not an optimized design. `config/eg50_example.yaml` illustrates all new thermal settings. `studies/extension_study.py` compares baseline and selected geometry across all three fluids and exports a separate `results/extension_study` directory, preserving historical study outputs.
+
+The dashboard and reports expose mass, enthalpy/energy, pressure/friction, orifice, pump, HX, chip and optimization equations through `src/nvl72/equations.py`. Design CSVs contain constraint status, qualification gaps, weighted objective, flow error, temperature spread, estimated chip ceiling/headroom, head, pump power, header volume and facility requirements. Objective remains the existing normalized weighted sum of flow error, outlet spread, pressure, pump power and header volume; a low score never overrides failed constraints. Compare geometry scores under matched operating boundaries and weights. Coolant comparisons intentionally change fluid and retain the selected load/geometry/controls; pump mode can produce different operating flows. A static nominal screen is not a robustness probability or proof of an optimal design.

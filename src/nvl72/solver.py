@@ -14,10 +14,21 @@ from .objectives import targets, metrics
 from .cdu import pump_head, power
 from .facility import facility_check
 from .coldplate import channel_model
+from .design_analysis import chip_estimates, CHIP_DEFAULTS
 from .units import c_to_k,k_to_c,lpm_to_m3s,m3s_to_lpm
 
 def solve(c: dict) -> dict:
-    c=deepcopy(c); validate(c)
+    c=deepcopy(c)
+    c['facility'].setdefault('design_deltaT_K',12.)
+    c['facility'].setdefault('minimum_hot_pinch_K',0.)
+    c['cdu'].setdefault('rating_coolant','PG25')
+    c['cdu'].setdefault('rating_supply_C',40.)
+    for kind,bounds in CHIP_DEFAULTS.items():
+        spec=c.setdefault('chip_temperature',{}).setdefault(kind,{})
+        spec.setdefault('resistance_range_K_W',list(bounds))
+        spec.setdefault('target_max_C',80.)
+        spec.setdefault('manufacturer_limit_C',None)
+    validate(c)
     if c['rack']['operating_mode']=='pump': return _pump_solve(c)
     ids,kinds,heat,branches=tray_data(c); n=len(ids)
     coolant=Coolant(c['coolant']['type'],c['coolant']['property_file'],c['coolant']['viscosity_multiplier'])
@@ -83,7 +94,8 @@ def solve(c: dict) -> dict:
     add('maximum_diameter',limit['diameter_max_m']-float(all_d.max()),limit['diameter_max_m'],'m')
     add('HX_capacity',facility['HX_available_W_per_rack']-heat.sum(),d['capacity_W']/d['served_racks'],'W')
     add('HX_approach',facility['approach_K']-d['approach_K'],d['approach_K'],'K')
-    add('HX_hot_pinch',facility['hot_end_pinch_K'],20,'K')
+    add('HX_hot_pinch',facility['hot_end_pinch_K']-facility['minimum_hot_pinch_K'],20,'K')
+    add('FWS_design_temperature_rise',facility['design_deltaT_K']-facility['FWS_deltaT_K'],facility['design_deltaT_K'],'K')
     add('FWS_return',c['facility']['max_return_C']-facility['FWS_return_C'],20,'K')
     if d.get('secondary_max_C') is not None:
         add('CDU_secondary_max_temperature',d['secondary_max_C']-max(met['T_return_C'],c['rack']['supply_C']),20,'K')
@@ -113,7 +125,18 @@ def solve(c: dict) -> dict:
     if c['coldplate']['enabled']:
         channel=channel_model(m,heat,(ts+tout)/2,coolant.properties((ts+tout)/2),c['coldplate'])
         met.update(T_chip_max_C=float(k_to_c(channel['T_chip_equivalent_K']).max()),chip_spread_K=float(np.ptp(channel['T_chip_equivalent_K'])))
+    for i,tray in enumerate(trays):
+        tray['orifice_diameter_mm']=None if branches[i].get('orifice_diameter_m') is None else branches[i]['orifice_diameter_m']*1000
+        tray['orifice_Cd']=branches[i].get('orifice_Cd',.62)
+        tray['orifice_dP_kPa']=float(hp.branch_losses['orifices'][i]/1000)
+    chips=chip_estimates(c,trays)
+    add('chip_assumed_target',min(x['target_margin_K'] for x in chips),20,'K')
+    known=[x['manufacturer_margin_K'] for x in chips if x['manufacturer_margin_K'] is not None]
+    if known: add('chip_entered_manufacturer_limit',min(known),20,'K')
+    met['minimum_normalized_margin']=min(x['normalized_margin'] for x in constraints.values())
+    met['T_junction_upper_max_C']=max(x['junction_high_C'] for x in chips)
     return {'config':c,'metrics':met,'trays':trays,'constraints':constraints,'feasible':all(v['pass'] for v in constraints.values()),
+            'chip_estimates':chips,'qualification':'Unverified chip thermal model and hardware limits'+('; EG50 CDU/material compatibility unverified' if c['coolant']['type']=='EG50' else ''),
             'facility':facility,'pressure_budget_Pa':budget,'hydraulics':asdict(hp),'coldplate':channel,
             'validation':{'mass_relative_error':hp.mass_error,'energy_relative_error':energy,'pressure_residual_Pa':hp.residual_Pa,
                           'property_iterations':iteration,'nfev':count,'temperature_error_K':temp_error,'flow_relative_error':flow_error,'converged':True}}

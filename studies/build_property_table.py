@@ -10,9 +10,11 @@ import math
 from iapws import IAPWS97
 root = Path(__file__).resolve().parents[1]
 with (root/'data/coolant_properties.csv').open('w') as f:
-    writer = csv.writer(f)
+    writer = csv.writer(f,lineterminator='\n')
     writer.writerow(['coolant','T_K','rho_kg_m3','cp_J_kg_K','mu_Pa_s','k_W_m_K','category','source'])
     for C in range(5,96,5):
         w = IAPWS97(T=C+273.15,P=0.1)
         writer.writerow(['water',C+273.15,w.rho,w.cp*1000,w.mu,w.k,'DERIVED','IAPWS97, iapws 1.5.5, 0.1 MPa'])
         writer.writerow(['PG25',C+273.15,1020-0.5*(C-40),4120+(C-40),0.00147*math.exp(math.log(1.15/1.47)*(C-40)/10),0.476+0.0009*(C-40),'3P' if C==40 else 'ESTIMATE','agent.md section 8 anchors; other values modeled extensions'])
+    for C,cp,rho,k,mu in [(10,3.245,1078.72,.3724,5.5071),(40,3.361,1064.91,.3937,2.2567),(65,3.457,1050.05,.4062,1.2936),(90,3.554,1032.15,.4139,.8227),(120,3.670,1006.66,.4168,.5252)]:
+        writer.writerow(['EG50',C+273.15,rho,cp*1000,mu/1000,k,'MANUFACTURER','Dow DOWTHERM SR-1 Form 180-01312-602 AMS; 50% ethylene glycol by volume'])

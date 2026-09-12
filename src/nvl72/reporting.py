@@ -18,6 +18,10 @@ def export(result,directory='results',name='baseline',figures=True):
     for sub in ('tables','reports','figures'): (directory/sub).mkdir(parents=True,exist_ok=True)
     (directory/f'{name}.json').write_text(json.dumps(native(result),indent=2,allow_nan=False))
     pd.DataFrame(result['trays']).to_csv(directory/'tables'/f'{name}_trays.csv',index=False)
+    if 'chip_estimates' in result:
+        from .design_analysis import design_summary
+        pd.DataFrame(result['chip_estimates']).to_csv(directory/'tables'/f'{name}_chips.csv',index=False)
+        pd.DataFrame(design_summary({name:result})).to_csv(directory/'tables'/f'{name}_design_summary.csv',index=False)
     pd.DataFrame([dict(component=k,Pa=v,kPa=v/1000,percent=100*v/result['metrics']['system_dp_Pa']) for k,v in result['pressure_budget_Pa'].items()]).to_csv(directory/'tables'/f'{name}_pressure_budget.csv',index=False)
     if figures:
         from .plotting import result_figures
@@ -74,3 +78,9 @@ def write_report(r,path,prefix='baseline'):
     import re
     sections=[section for section in sections if not section.startswith('![') or all((Path(path).parent/link).exists() for link in re.findall(r'!\[[^\]]*\]\(([^)]+)\)',section))]
     Path(path).write_text('\n'.join(sections))
+    if 'chip_estimates' in r:
+        from .equations import EQUATIONS
+        with Path(path).open('a') as out:
+            out.write('\n# Chip estimates and qualification\n'+r['qualification']+'\n')
+            out.write(table(['Tray','Component','Lower °C','Upper °C','Target margin K'],[(x['tray_id'],x['component'],round(x['junction_low_C'],2),round(x['junction_high_C'],2),round(x['target_margin_K'],2)) for x in r['chip_estimates']]))
+            out.write('\n# Equation reference\n'+'\n'.join('## '+title+'\n$$'+formula+'$$\n'+description+'\n' for title,formula,description in EQUATIONS))

@@ -8,6 +8,14 @@ Start with [the computed engineering report](results/reports/engineering_report.
 
 ## Install and reproduce
 
+The dashboard now includes expandable derivations, water/PG25/EG50 comparisons, estimated chip-temperature intervals and configurable targets, independent facility-water controls, a design-summary CSV, and independently editable orifices at all 27 trays. Download the complete result JSON to retain the resolved configuration. New research and explicit defaults are documented in the September 12 addendum to [agent.md](agent.md).
+
+EG50 is 50% ethylene glycol **by volume**, using Dow SR-1 typical properties over 10–120°C. It is not qualified for this CDU/material system. Chip resistances and the default 80°C ceiling are engineering assumptions, not manufacturer-defined optimal temperatures. Enter installed thermal limits and measured resistance data before treating a pass as performance evidence.
+
+Reproduce the seven new cases with `PYTHONPATH=src .venv/bin/python studies/extension_study.py`. View [design comparisons](results/extension_study/design_comparison.csv), plus per-case JSON, chip/tray/design CSVs and equation-bearing reports in `results/extension_study`. Earlier reports and their uncertainty results are historical; the new chip and facility checks were not retroactively included in those Monte Carlo counts.
+
+At matched 115.56 kW, 40°C and 120 L/min, the selected PG25 design estimates an upper chip temperature of 77.80°C and 350.31 W external-duty pump power. Changing only the coolant to EG50 gives 80.09°C and 382.42 W and fails the assumed chip ceiling and conservative HX capacity screen. These differences include resolved coolant-property effects; unmeasured cold-plate and chip-resistance changes remain outside the comparison. The original facility case needs approximately 139.15 L/min for the new assumed 12 K rise allowance; the configured 150 L/min exceeds this requirement.
+
 Python 3.11 or later:
 
 ```sh
