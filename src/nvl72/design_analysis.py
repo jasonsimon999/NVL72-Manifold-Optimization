@@ -35,7 +35,7 @@ def design_summary(named_results):
         m=r['metrics']; f=r['facility']; chips=r['chip_estimates']
         rows.append(dict(design=name,coolant=r['config']['coolant']['type'],heat_kW=m['heat_W']/1000,
             flow_LPM=m['rack_flow_LPM'],supply_C=r['config']['rack']['supply_C'],
-            nominal_constraints_pass=r['feasible'],qualification=r['qualification'],
+            enforced_requirements_pass=r['feasible'],all_screens_pass=r.get('screening_pass',all(v['pass'] for v in r['constraints'].values())),qualification=r['qualification'],
             score_lower_is_better=objective(r),RMS_flow_error=m['RMS_target_error'],
             outlet_max_C=m['T_out_max_C'],outlet_spread_K=m['outlet_spread_K'],
             chip_upper_max_C=max(x['junction_high_C'] for x in chips),
@@ -43,5 +43,5 @@ def design_summary(named_results):
             pressure_kPa=m['system_dp_Pa']/1000,pump_W=m['pump_electrical_W'],
             header_volume_L=m['header_volume_m3']*1000,FWS_required_LPM=f['required_flow_LPM'],
             FWS_return_C=f['FWS_return_C'],minimum_margin=m['minimum_normalized_margin'],
-            limiting_constraint=min(r['constraints'],key=lambda k:r['constraints'][k]['normalized_margin'])))
+            limiting_constraint=min((k for k,v in r['constraints'].items() if v.get('enforced',True)),key=lambda k:r['constraints'][k]['normalized_margin'])))
     return rows

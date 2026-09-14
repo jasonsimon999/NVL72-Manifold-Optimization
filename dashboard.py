@@ -32,39 +32,55 @@ with st.sidebar:
     st.header('Operating condition')
     flow=st.slider('Rack flow [L/min]',90.,130.,120.,1.)
     supply=st.slider('TCS supply [°C]',25.,45.,40.,.5)
-    coolant=st.selectbox('Coolant',['PG25','water','EG50'],help='EG50 = 50% ethylene glycol by volume; Dow SR-1 property proxy, not approved rack coolant.')
+    coolant=st.selectbox('Coolant',['PG25','water','EG50','PG25_Dow2023'],help='PG25 retains legacy assumptions. PG25_Dow2023 uses the versioned Dow LC25 table (−5 to 80°C); select the formulation matching your fluid. EG50 = 50% ethylene glycol by volume, not approved rack coolant.')
     compute=st.slider('Compute load fraction',0.05,1.,1.,.05)
     switch=st.slider('Switch load fraction',.05,1.2,1.,.05)
     cdu=st.selectbox('CDU',['in_rack','in_row'])
+    racks=st.number_input('Racks served by CDU',1,32,1 if cdu=='in_rack' else 8,1)
     fw_supply=st.number_input('Facility water supply [°C]',5.,60.,36.,.5)
-    fw_flow=st.number_input('Facility water flow, entire CDU [L/min]',10.,3000.,150. if cdu=='in_rack' else 1200.,10.)
+    fw_flow=st.number_input('Facility water flow, entire CDU [L/min]',min_value=10.,value=150. if cdu=='in_rack' else 1200.,step=10.,help='Operating flow available to this CDU, not the whole building. No arbitrary upper UI cap; confirm primary-side hydraulic capability.')
     fw_rise=st.number_input('Facility design temperature rise [K]',1.,30.,12.,.5)
     fw_pinch=st.number_input('Minimum HX hot-end pinch [K]',0.,15.,0.,.5)
+    fw_ceiling=st.number_input('Facility return ceiling [°C]',10.,90.,60.,1.)
+    facility_capacity=st.number_input('Available facility duty at this CDU [kW; 0 unknown]',min_value=0.,value=0.,step=100.)
+    hx_ua=st.number_input('Verified/evaluated HX UA [kW/K; 0 unknown]',min_value=0.,value=0.,step=1.,help='Optional user-supplied conductance at this operating point. Do not infer this from nominal capacity alone.')
+    strict=st.checkbox('Enforce provisional assumptions as hard constraints',False,help='Otherwise nominal rating extrapolations and assumed chip targets remain visible as advisory screens. A pass is not hardware qualification.')
     st.header('Manifold and balancing')
     diameter=st.slider('Main header ID [mm]',25.,50.,38.,.5,help='Internal diameter of the main supply/return passage carrying aggregate rack flow. This is not the tray QD bore or its AN connection size. 38 mm is an assumed geometry.')
     taper=st.slider('Tip / main diameter ratio',.6,1.,1.,.01)
-    kc=st.number_input('Compute restriction [million Pa/(kg/s)²]',0.,200.,0.,.1)
-    ks=st.number_input('Switch restriction [million Pa/(kg/s)²]',0.,200.,0.,1.)
+    balancing=st.selectbox('Balancing representation',['Automatic equivalent orifices','Resistance coefficients','Manual orifice bores'])
+    orifice_cd=st.number_input('Automatic orifice Cd',.01,1.,.62,.01)
+    kc=st.number_input('Compute restriction [million Pa/(kg/s)²]',0.,200.,0.,.1,disabled=balancing=='Manual orifice bores')
+    ks=st.number_input('Switch restriction [million Pa/(kg/s)²]',0.,200.,0.,1.,disabled=balancing=='Manual orifice bores')
     gravity=st.checkbox('Include gravity',True)
     operating=st.selectbox('Operating mode',['fixed_flow','pump'])
     metric=st.selectbox('Schematic color',['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'])
     if st.button('Show saved optimized result'):
         st.session_state['show_saved']=True
 c=load_config(PROJECT_ROOT / 'config/inrow.yaml') if cdu=='in_row' else deepcopy(base_config)
+c['cdu']['served_racks']=racks
+c['constraint_policy']={'enforce_assumptions':strict}
+c['facility']['available_capacity_W']=facility_capacity*1000 if facility_capacity else None
+c['facility']['UA_W_K']=hx_ua*1000 if hx_ua else None
+c['facility']['max_return_C']=fw_ceiling
+c['balancing_mode']='auto_equivalent' if balancing=='Automatic equivalent orifices' else 'resistance'
+for kind in ('compute','switch'): c['branches'][kind]['orifice_Cd']=orifice_cd
 c['rack'].update(flow_LPM=flow,supply_C=supply,gravity_enabled=gravity,operating_mode=operating)
 c['coolant']['type']=coolant;c['facility'].update(supply_C=fw_supply,flow_LPM=fw_flow,design_deltaT_K=fw_rise,minimum_hot_pinch_K=fw_pinch)
 c['power'].update(compute_fraction=compute,switch_fraction=switch)
 c['geometry']['supply'].update(profile='power' if taper<1 else 'constant',inlet_m=diameter/1000,outlet_m=diameter*taper/1000)
 c['geometry']['return'].update(profile='power' if taper<1 else 'constant',inlet_m=diameter*taper/1000,outlet_m=diameter/1000)
 c['branches']['compute']['restriction_K']=kc*1e6;c['branches']['switch']['restriction_K']=ks*1e6
+if balancing=='Manual orifice bores':
+    for kind in ('compute','switch'): c['branches'][kind]['restriction_K']=0.
 with st.expander('Individual tray orifices — edit bore and discharge coefficient'):
-    st.caption('Enable any tray independently. Bore must be smaller than its branch ID. Orifices add to the class restriction controls; Cd and the thin-plate loss approximation need measured calibration.')
+    st.caption('Select Manual orifice bores to activate these entries; class restrictions are then disabled. In Automatic mode, solved equivalent bores appear below and replace the balancing resistance once, without double counting.')
     ids,kinds,_,branches=tray_data(c)
     edited=st.data_editor(pd.DataFrame([dict(tray_id=i,enabled=False,bore_mm=4. if kind=='compute' else 2.5,Cd=.62,branch_ID_mm=b['diameter_m']*1000) for i,kind,b in zip(ids,kinds,branches)]),
-        hide_index=True,disabled=['tray_id','branch_ID_mm'],key='orifice_editor',
+        hide_index=True,disabled=['tray_id','branch_ID_mm'] if balancing=='Manual orifice bores' else True,key='orifice_editor',
         column_config={'bore_mm':st.column_config.NumberColumn(min_value=.1,step=.1),'Cd':st.column_config.NumberColumn(min_value=.01,max_value=1.,step=.01)})
     for row in edited.to_dict('records'):
-        if row['enabled']: c['branches']['overrides'].setdefault(row['tray_id'],{}).update(orifice_diameter_m=row['bore_mm']/1000,orifice_Cd=row['Cd'])
+        if row['enabled'] and balancing=='Manual orifice bores': c['branches']['overrides'].setdefault(row['tray_id'],{}).update(orifice_diameter_m=row['bore_mm']/1000,orifice_Cd=row['Cd'])
 with st.expander('Chip thermal assumptions and performance targets'):
     st.caption('80°C is an editable engineering target, not an NVIDIA optimal-performance specification. Enter measured junction-to-coolant resistances and installed thermal limits to improve this screen. Zero manufacturer limit means unknown.')
     c['chip_temperature']={}
@@ -75,6 +91,14 @@ with st.expander('Chip thermal assumptions and performance targets'):
         target=cols[2].number_input(f'{kind} target ceiling [°C]',20.,150.,80.,1.)
         limit=cols[3].number_input(f'{kind} manufacturer limit [°C; 0 unknown]',0.,150.,0.,1.)
         c['chip_temperature'][kind]=dict(resistance_range_K_W=[lo,hi],target_max_C=target,manufacturer_limit_C=limit or None)
+with st.expander('Configured rack limits — confirm against installed hardware'):
+    st.caption('45°C supply, 65°C return and 130 L/min are a QCT reference operating envelope, not universal NVL72 limits. Header velocity and diameter limits are design choices. Facility capacity does not determine these rack limits.')
+    for key,label in [('rack_flow_max_LPM','Rack flow ceiling [L/min]'),('supply_max_C','Rack supply ceiling [°C]'),('return_max_C','Rack mixed return ceiling [°C]'),('branch_outlet_max_C','Tray outlet ceiling [°C]'),('header_velocity_max_m_s','Header velocity ceiling [m/s]')]:
+        c['constraints'][key]=st.number_input(label,min_value=.1,value=float(c['constraints'][key]),step=.5)
+    st.caption('A target above a coolant table’s temperature range cannot be evaluated; select an appropriate property table rather than extrapolating silently.')
+with st.expander('Model audit and evidence'):
+    audit_path=PROJECT_ROOT/'docs/MODEL_AUDIT.md'
+    if audit_path.exists(): st.markdown(audit_path.read_text())
 try:
     baseline=calculate(base_config);result=calculate(c)
 except (ValueError,RuntimeError) as exc:
@@ -85,12 +109,13 @@ m=result['metrics'];a=baseline['metrics']
 columns=st.columns(4)
 for col,title,key,format_str,unit in [(columns[0],'Maximum outlet','T_out_max_C','.2f','°C'),(columns[1],'RMS target error','RMS_target_error','.4f',''),(columns[2],'System pressure','system_dp_Pa','.0f','Pa'),(columns[3],'Pump electrical','pump_electrical_W','.1f','W')]:
     col.metric(title,f'{m[key]:{format_str}} {unit}',f'{m[key]-a[key]:+.{2}f} vs reference',delta_color='inverse')
-if result['feasible']:st.success('Simulation converged — all configured nominal constraints pass')
-else:
-    st.warning('Simulation converged — one or more design limits fail. Results below remain available for comparison.')
+if result['feasible']:st.success('Simulation converged — enforced requirements pass. Check advisory screens and qualification gaps below.')
+else:st.error('Simulation converged — an enforced requirement fails. Inspect the shortfalls below.')
+if not result['screening_pass']:
+    st.warning('Simulation converged — some requirements or advisory screens fail. Advisory failures do not establish hardware incompatibility.')
     guidance={
         'HX_capacity':'Approximate rating screen, not a measured HX map. Check load, approach and coolant heat-capacity flow rate against the CDU rating.',
-        'HX_approach':'Facility supply must be at least the configured approach below rack supply. Lowering rack supply alone does not cool the facility water.',
+        'HX_approach':'Approach is below the nominal rating reference; this needs a vendor performance map. Positive terminal temperature differences remain mandatory.',
         'CDU_aggregate_flow':'Per-rack flow × served racks exceeds the selected CDU flow rating. Use a rated operating point or a substantiated larger CDU.',
         'chip_assumed_target':'Upper chip estimate exceeds the assumed target. Check measured thermal resistance and cooling conditions; this is not verified NVIDIA throttling.',
         'chip_entered_manufacturer_limit':'Upper chip estimate exceeds an entered manufacturer limit.',
@@ -100,11 +125,18 @@ else:
         'FWS_design_temperature_rise':'Facility-water rise exceeds the selected design allowance. Check facility flow and heat load.',
         'FWS_return':'Facility return exceeds its configured ceiling. Check facility supply and flow.',
         'header_velocity':'Header velocity exceeds its configured ceiling. Check diameter and rack flow.'}
-    failed=[dict(constraint=k,shortfall=-v['margin'],units=v['units'],explanation=guidance.get(k,'Calculated demand is outside this configured limit; inspect the constraint table and inputs.')) for k,v in result['constraints'].items() if not v['pass']]
+    failed=[dict(constraint=k,enforced=v['enforced'],shortfall=-v['margin'],units=v['units'],basis=v['basis'],explanation=guidance.get(k,'Calculated demand is outside this configured limit; inspect the constraint table and inputs.')) for k,v in result['constraints'].items() if not v['pass']]
     st.dataframe(pd.DataFrame(failed),width='stretch',hide_index=True)
 st.caption('Reference stays at 115.56 kW, PG25, 40°C, 120 L/min with constant headers. Facility water is controlled independently. A nominal pass is an engineering screen, not hardware qualification.')
 st.info(result['qualification'])
 df=pd.DataFrame(result['trays']);ref=pd.DataFrame(baseline['trays'])
+if c['balancing_mode']=='auto_equivalent':
+    st.subheader('Automatically sized equivalent orifices')
+    st.dataframe(df[['tray_id','balancing_restriction_K','orifice_diameter_mm','orifice_Cd','orifice_reference_density_kg_m3','orifice_dP_kPa']],hide_index=True,width='stretch')
+    st.caption('Bores are redesigned for this operating point using each branch’s solved mean coolant density. Zero K means no plate. This is mathematical equivalence within the assumed thin-plate model, not calibrated machining dimensions. Freeze/export these bores before studying the same hardware at another operating point.')
+    import yaml
+    from nvl72.config import portable_config
+    st.download_button('Download fixed-orifice design YAML',yaml.safe_dump(portable_config(result['fixed_orifice_config']),sort_keys=False),'fixed_orifice_design.yaml','text/yaml')
 left,right=st.columns([1,2])
 with left:
     st.pyplot(rack_schematic(result,metric))
@@ -134,7 +166,7 @@ with pump_tab:
     st.write(f"Required duty: {m['rack_flow_LPM']:.2f} L/min at {m['system_dp_Pa']/1000:.2f} kPa")
     st.json(result['facility'])
     f=result['facility']
-    st.write(f"Facility cooling duty: {f['aggregate_heat_W']/1000:.2f} kW across {c['cdu']['served_racks']} rack(s). Maximum supply: {f['maximum_FWS_supply_C']:.1f}°C. Actual return: {f['FWS_return_C']:.2f}°C.")
+    st.write(f"Facility cooling duty: {f['aggregate_heat_W']/1000:.2f} kW across {c['cdu']['served_racks']} rack(s). Supply at nominal approach: {f['maximum_FWS_supply_C']:.1f}°C (rating reference). Actual return: {f['FWS_return_C']:.2f}°C.")
     if f['required_flow_LPM'] is None: st.warning('No finite facility flow meets the selected temperature/pinch limits.')
     else: st.write(f"Minimum facility flow for the selected rise, return ceiling and pinch: {f['required_flow_LPM']:.1f} L/min.")
     st.caption('Required UA assumes counterflow. Facility cooling duty excludes unmodeled pump heat. Facility pump head cannot be sized without its pipe/equipment curves.')
@@ -149,7 +181,7 @@ st.subheader('Design analysis summary')
 summary=pd.DataFrame(design_summary({'Original reference':baseline,'Current candidate':result}))
 st.dataframe(summary,width='stretch',hide_index=True)
 st.download_button('Download design summary CSV',summary.to_csv(index=False),'design_summary.csv','text/csv')
-st.caption('Compare scores at equal load, coolant, supply, flow and objective weights. Reject failed constraints before ranking; a low score cannot override a failure. Header volume represents space/material tendency, not manufactured cost.')
+st.caption('Compare scores at equal load, coolant, supply, flow and objective weights. Reject failed enforced requirements before ranking and review all advisory screens. Header volume represents space/material tendency, not manufactured cost.')
 with st.expander('Compare water, PG25 and EG50 using this design'):
     if st.button('Run coolant comparison'):
         cases={}

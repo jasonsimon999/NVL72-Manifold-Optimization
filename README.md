@@ -2,7 +2,9 @@
 
 A working Python thermal/hydraulic network and design study for **18 compute trays + 9 switch trays**, with heterogeneous heat loads, spatially resolved supply and return headers, and explicit CDU/facility constraints. The primary load is **115.56 kW**. This is an engineering reference model, not NVIDIA's proprietary rack design.
 
-The executed study selected Design C: constant 38 mm headers with an added switch-path restriction. It lowers nominal maximum outlet from 55.97°C to 53.80°C, with pump electrical demand rising from 266.11 W to 350.31 W. It passes the nominal screen; 27 of 32 hardware-uncertainty draws pass, so it is not qualified across the full uncertainty range.
+The historical study selected Design C: constant 38 mm headers with an added switch-path restriction. It lowers nominal maximum outlet from 55.97°C to 53.80°C, with pump electrical demand rising from 266.11 W to 350.31 W. Under that study's original constraint policy, 27 of 32 hardware-uncertainty draws passed. That historical rate is not a current-policy result or measured reliability.
+
+**September 2026 audit:** [Read the findings and input/constraint review](docs/MODEL_AUDIT.md). Automatic equivalent orifices now translate compute/switch balancing resistance into per-tray bores without double counting; download fixed bores before testing another operating point. Nominal rating screens are separated from enforced requirements, and all failures remain visible. Facility flow, available duty and HX conductance are independently configurable. A versioned Dow PG25 profile exposes an important coolant-property uncertainty. See [reproduced audit comparisons](results/audit/comparison.csv).
 
 Start with [the computed engineering report](results/reports/engineering_report.md), [baseline inputs](config/baseline.yaml), and [source provenance](data/sources.yaml). The original [agent.md](agent.md) is retained as the primary engineering specification. The results are conditional on assumed component pressure losses.
 

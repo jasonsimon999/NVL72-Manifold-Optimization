@@ -49,7 +49,7 @@ def optimize(c,design='D',method='local'):
         if key in cache: return cache[key]
         try:
             result=solve(decode(c,design,names,bounds,x))
-            margins=np.array([v['normalized_margin'] for v in result['constraints'].values()])
+            margins=np.array([v['normalized_margin'] for v in result['constraints'].values() if v.get('enforced',True)])
             score=objective(result)+c['constraints']['soft_penalty']*np.sum(np.minimum(0,margins)**2)
             archive.append(result)
             cache[key]=(score,result,margins)
@@ -83,7 +83,7 @@ def optimize(c,design='D',method='local'):
                          'local_success':bool(local.success),'local_message':str(local.message),
                          'global_status':global_status,'evaluations':len(cache),'failed_evaluations':len(failures),
                          'selection':'lowest objective among actually solved feasible candidates; not proof of global optimality'}
-    rows=[dict(r['metrics'],feasible=r['feasible'],design=design,objective=objective(r)) for r in archive]
+    rows=[dict(r['metrics'],feasible=r['feasible'],all_screens_pass=r['screening_pass'],design=design,objective=objective(r)) for r in archive]
     return best,rows
 
 if __name__=='__main__':

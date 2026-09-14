@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pandas as pd
 import yaml
-from .config import ROOT
+from .config import ROOT, portable_config
 
 def native(value):
     if isinstance(value,np.ndarray):return value.tolist()
@@ -17,6 +17,8 @@ def export(result,directory='results',name='baseline',figures=True):
     directory=Path(directory)
     for sub in ('tables','reports','figures'): (directory/sub).mkdir(parents=True,exist_ok=True)
     (directory/f'{name}.json').write_text(json.dumps(native(result),indent=2,allow_nan=False))
+    if result.get('fixed_orifice_config'):
+        (directory/f'{name}_fixed_orifices.yaml').write_text(yaml.safe_dump(portable_config(result['fixed_orifice_config']),sort_keys=False))
     pd.DataFrame(result['trays']).to_csv(directory/'tables'/f'{name}_trays.csv',index=False)
     if 'chip_estimates' in result:
         from .design_analysis import design_summary
@@ -70,11 +72,11 @@ def write_report(r,path,prefix='baseline'):
       '# Pump requirements\n'+f'Rack {m["rack_dp_Pa"]/1000:.3f} kPa; system {m["system_dp_Pa"]/1000:.3f} kPa; hydraulic {m["pump_hydraulic_W"]:.2f} W; electrical {m["pump_electrical_W"]:.2f} W.\n',
       '# Facility-loop compatibility\n'+table(['Quantity','Value'],r['facility'].items()),
       '# Uncertainty analysis\nSee uncertainty.csv and engineering_report.md for paired baseline/candidate draws, worst sampled outcomes and feasibility rates. A nominal pass alone does not establish robustness.\n',
-      '# Constraint margins\n'+f'Overall: **{"PASS" if r["feasible"] else "FAIL"}**\n'+table(['Constraint','Margin','Units','Pass'],[(k,f'{v["margin"]:.6g}',v['units'],v['pass']) for k,v in r['constraints'].items()]),
+      '# Constraint margins\n'+f'Enforced requirements: **{"PASS" if r["feasible"] else "FAIL"}**. All screens including advisories: **{"PASS" if r.get("screening_pass",all(v["pass"] for v in r["constraints"].values())) else "FAIL"}**.\n'+table(['Constraint','Margin','Units','Pass','Enforced','Basis'],[(k,f'{v["margin"]:.6g}',v['units'],v['pass'],v.get('enforced',True),v.get('basis','Historical result: original enforcement policy retained.')) for k,v in r['constraints'].items()]),
       '# Validation\n'+table(['Check','Result'],r['validation'].items()),
       '# Improvement over baseline\nThe executed comparison is in engineering_report.md; no proprietary manifold comparison is implied.\n',
       '# Limitations\n'+LIMITATIONS+'\n',
-      '# Conclusions\n'+('This candidate passes the configured nominal engineering screen.' if r['feasible'] else 'This design violates one or more configured constraints and must not be presented as acceptable.')+'\n']
+      '# Conclusions\n'+('This candidate passes enforced requirements. Advisory screens and unverified hardware/site assumptions still require review.' if r['feasible'] else 'This design violates one or more enforced requirements.')+'\n']
     import re
     sections=[section for section in sections if not section.startswith('![') or all((Path(path).parent/link).exists() for link in re.findall(r'!\[[^\]]*\]\(([^)]+)\)',section))]
     Path(path).write_text('\n'.join(sections))

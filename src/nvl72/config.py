@@ -27,6 +27,13 @@ def load_config(path: str | Path = ROOT / 'config/baseline.yaml') -> dict:
     validate(cfg)
     return cfg
 
+def portable_config(c: dict) -> dict:
+    """Make the bundled property path portable without rewriting custom data paths."""
+    out=deepcopy(c)
+    if Path(out['coolant']['property_file']).resolve()==(ROOT/'data/coolant_properties.csv').resolve():
+        out['coolant']['property_file']='data/coolant_properties.csv'
+    return out
+
 def validate(c: dict) -> None:
     def require(ok, message):
         if not ok: raise ValueError(message)

@@ -17,14 +17,14 @@ known={
  'power.gpus_per_compute_tray':('NVIDIA','architecture','Published topology'),
  'power.cpus_per_compute_tray':('NVIDIA','architecture','Published topology'),
  'power.grace_cpu_W_each':('DERIVED','power','(5800-4*1200)/2; allocated budget'),
- 'power.switch_rack_total_W':('NVIDIA','switch','Static aggregate power recommendation'),
+ 'power.switch_rack_total_W':('ASSUMPTION','switch','Historical static power reference; not independently reverified in September 2026 audit. Full liquid heat capture is assumed.'),
  'rack.flow_LPM':('ASSUMPTION','cdu','Selected equal to CDU rated point'),
  'cdu.capacity_W':('OEM','cdu','At stated 4 K approach and nominal flow'),
  'cdu.nominal_flow_LPM':('OEM','cdu','Rated flow, not an independently verified maximum'),
  'cdu.available_dp_Pa':('OEM','cdu','External available head; excludes internal CDU losses'),
  'cdu.approach_K':('OEM','cdu','Rated approach, not full UA map'),
  'cdu.nominal_electric_W':('OEM','cdu','Whole CDU rating, not rack pumping prediction'),
- 'constraints.rack_flow_max_LPM':('OEM','qct','QCT implementation envelope'),
+ 'constraints.rack_flow_max_LPM':('OEM','qct','QCT reference flow need; using it as a ceiling is a configured design choice, not a verified universal hardware maximum.'),
  'constraints.supply_max_C':('OEM','qct','QCT implementation maximum'),
  'constraints.return_max_C':('OEM','qct','QCT implementation maximum')}
 def units(key,value):

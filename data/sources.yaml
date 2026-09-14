@@ -148,10 +148,10 @@ defaults:
   power.switch_rack_total_W:
     value: 11160
     units: W
-    category: NVIDIA
+    category: ASSUMPTION
     source: switch
     url: https://docs.nvidia.com/datacenter/dps/versions/0.8/guides/runbooks/maxlps-simple-mode-pilot/
-    notes: Static aggregate power recommendation
+    notes: Historical static power reference; not independently reverified in September 2026 audit. Full liquid heat capture is assumed.
   power.compute_fraction:
     value: 1.0
     units: '1'
@@ -675,7 +675,7 @@ defaults:
     category: OEM
     source: qct
     url: https://blog.qct.io/wp-content/uploads/2025/04/QCT-Qoolrack-Stand-Alone_Advanced-Liquid-Cooling-for-NVIDIA-GB200-NVL72-Systems.pdf
-    notes: QCT implementation envelope
+    notes: QCT reference flow need; using it as a ceiling is a configured design choice, not a verified universal hardware maximum.
   constraints.supply_max_C:
     value: 45
     units: "\xB0C"

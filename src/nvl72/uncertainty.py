@@ -32,7 +32,7 @@ def uncertainty(configs:dict,samples=None,operating_variation=True):
                  'actual_supply_C':d['rack']['supply_C'],'actual_compute_fraction':d['power']['compute_fraction'],
                  'actual_switch_fraction':d['power']['switch_fraction'],**{'draw_'+k:v for k,v in draw.items()}}
             try:
-                r=solve(d);row.update(r['metrics'],feasible=r['feasible'],error=None)
+                r=solve(d);row.update(r['metrics'],feasible=r['feasible'],all_screens_pass=r['screening_pass'],error=None)
             except (ValueError,RuntimeError) as exc:row.update(feasible=False,error=str(exc))
             rows.append(row)
     return rows

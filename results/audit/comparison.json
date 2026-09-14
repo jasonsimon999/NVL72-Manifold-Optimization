@@ -1,0 +1,98 @@
+[
+  {
+    "case": "reference",
+    "enforced_pass": true,
+    "all_screens_pass": true,
+    "failed_enforced": "",
+    "failed_advisory": "",
+    "outlet_max_C": 55.96999582540781,
+    "chip_upper_C": 79.9699958254078,
+    "pressure_kPa": 79.83385472782558,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 22.267974710835
+  },
+  {
+    "case": "flow110",
+    "enforced_pass": true,
+    "all_screens_pass": false,
+    "failed_enforced": "",
+    "failed_advisory": "HX_capacity, chip_assumed_target",
+    "outlet_max_C": 57.42058524523867,
+    "chip_upper_C": 81.42058524523867,
+    "pressure_kPa": 67.25358168561323,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 20.251588698497184
+  },
+  {
+    "case": "flow125",
+    "enforced_pass": true,
+    "all_screens_pass": false,
+    "failed_enforced": "",
+    "failed_advisory": "CDU_aggregate_flow",
+    "outlet_max_C": 55.331749296854866,
+    "chip_upper_C": 79.33174929685487,
+    "pressure_kPa": 86.52447066412891,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 23.332200475973156
+  },
+  {
+    "case": "impossible_35C_supply_36C_facility",
+    "enforced_pass": false,
+    "all_screens_pass": false,
+    "failed_enforced": "HX_cold_pinch",
+    "failed_advisory": "HX_capacity, HX_approach",
+    "outlet_max_C": 50.95041202632825,
+    "chip_upper_C": 74.95041202632825,
+    "pressure_kPa": 80.48341224636856,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": null
+  },
+  {
+    "case": "header32mm",
+    "enforced_pass": true,
+    "all_screens_pass": false,
+    "failed_enforced": "",
+    "failed_advisory": "chip_assumed_target",
+    "outlet_max_C": 56.074518175002254,
+    "chip_upper_C": 80.07451817500225,
+    "pressure_kPa": 83.19041969193448,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 22.2679747108351
+  },
+  {
+    "case": "versioned_pg25",
+    "enforced_pass": true,
+    "all_screens_pass": false,
+    "failed_enforced": "",
+    "failed_advisory": "HX_capacity, chip_assumed_target",
+    "outlet_max_C": 56.706773338883124,
+    "chip_upper_C": 80.70677333888312,
+    "pressure_kPa": 80.40552700616014,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 21.176947603856238
+  },
+  {
+    "case": "hypothetical_stronger_facility",
+    "enforced_pass": true,
+    "all_screens_pass": true,
+    "failed_enforced": "",
+    "failed_advisory": "",
+    "outlet_max_C": 55.96999582540781,
+    "chip_upper_C": 79.9699958254078,
+    "pressure_kPa": 79.83385472782558,
+    "facility_return_C": 41.56614018065693,
+    "required_UA_kW_K": 15.745650248243656
+  },
+  {
+    "case": "automatic_switch150M",
+    "enforced_pass": true,
+    "all_screens_pass": true,
+    "failed_enforced": "",
+    "failed_advisory": "",
+    "outlet_max_C": 53.90711118271446,
+    "chip_upper_C": 77.90711118271446,
+    "pressure_kPa": 103.55519666867544,
+    "facility_return_C": 47.13213280558631,
+    "required_UA_kW_K": 22.267974710835
+  }
+]

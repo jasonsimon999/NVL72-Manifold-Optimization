@@ -25,7 +25,7 @@ def sweep(c,parameter,values):
     for v in values:
         row={'parameter':parameter,'value':float(v)}
         try:
-            r=solve(set_parameter(c,parameter,v));row.update(r['metrics'],feasible=r['feasible'],error=None)
+            r=solve(set_parameter(c,parameter,v));row.update(r['metrics'],feasible=r['feasible'],all_screens_pass=r['screening_pass'],error=None)
         except (ValueError,RuntimeError) as exc:row.update(feasible=False,error=str(exc))
         rows.append(row)
     return rows

@@ -26,6 +26,8 @@ def facility_check(c, heat_W, total_mass, return_K, coolant):
     return {'FWS_return_C':float(k_to_c(fout)), 'FWS_supply_C':f['supply_C'],
             'FWS_flow_LPM':f['flow_LPM'],'FWS_deltaT_K':float(fout-tin),
             'required_flow_LPM':None if required is None else float(required),
+            'entered_available_capacity_W':f.get('available_capacity_W'),
+            'entered_UA_W_K':f.get('UA_W_K'),
             'design_deltaT_K':rise,'minimum_hot_pinch_K':pinch,
             'maximum_FWS_supply_C':c['rack']['supply_C']-d['approach_K'],
             'required_UA_W_K':float(heat_W*racks/lmtd) if lmtd and lmtd>0 else None,
@@ -34,5 +36,5 @@ def facility_check(c, heat_W, total_mass, return_K, coolant):
             'approach_K':atd,'HX_available_W_per_rack':float(available/racks),
             'effectiveness_required':float(heat_W*racks/qmax) if qmax>0 else None,
             'hot_end_pinch_K':float(return_K-fout),
-            'model':'conservative rating scaling by cold-end approach and TCS capacity rate; no vendor UA map',
+            'model':'Heuristic rating screen, not a capacity guarantee. maximum_FWS_supply_C is the nominal approach reference only; required flow is calorimetric, not a vendor control-flow limit.',
             'aggregate_heat_W':float(heat_W*racks)}

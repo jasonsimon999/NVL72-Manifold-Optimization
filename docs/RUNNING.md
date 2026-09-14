@@ -1,5 +1,7 @@
 # Run in VS Code
 
+For the audited model, select **Automatic equivalent orifices**, then change the compute/switch restriction controls. The per-tray table updates automatically. Download the fixed-orifice YAML to evaluate unchanged bores at other operating conditions. Review advisory screens even when enforced requirements pass. The **Model audit and evidence** expander explains the assumptions.
+
 ## First-time setup (macOS)
 
 1. Install Python 3.11 or later and the Microsoft Python extension in VS Code.
