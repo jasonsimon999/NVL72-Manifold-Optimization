@@ -41,7 +41,7 @@ with st.sidebar:
     fw_rise=st.number_input('Facility design temperature rise [K]',1.,30.,12.,.5)
     fw_pinch=st.number_input('Minimum HX hot-end pinch [K]',0.,15.,0.,.5)
     st.header('Manifold and balancing')
-    diameter=st.slider('Main header ID [mm]',25.,50.,38.,.5)
+    diameter=st.slider('Main header ID [mm]',25.,50.,38.,.5,help='Internal diameter of the main supply/return passage carrying aggregate rack flow. This is not the tray QD bore or its AN connection size. 38 mm is an assumed geometry.')
     taper=st.slider('Tip / main diameter ratio',.6,1.,1.,.01)
     kc=st.number_input('Compute restriction [million Pa/(kg/s)²]',0.,200.,0.,.1)
     ks=st.number_input('Switch restriction [million Pa/(kg/s)²]',0.,200.,0.,1.)
@@ -78,13 +78,30 @@ with st.expander('Chip thermal assumptions and performance targets'):
 try:
     baseline=calculate(base_config);result=calculate(c)
 except (ValueError,RuntimeError) as exc:
-    st.error(str(exc));st.stop()
+    st.error(f'No valid numerical result: {exc}')
+    st.caption('Check property-temperature range, positive flow, orifice bore below branch ID, and resistance bounds. This differs from a converged result that fails a design limit.')
+    st.stop()
 m=result['metrics'];a=baseline['metrics']
 columns=st.columns(4)
 for col,title,key,format_str,unit in [(columns[0],'Maximum outlet','T_out_max_C','.2f','°C'),(columns[1],'RMS target error','RMS_target_error','.4f',''),(columns[2],'System pressure','system_dp_Pa','.0f','Pa'),(columns[3],'Pump electrical','pump_electrical_W','.1f','W')]:
     col.metric(title,f'{m[key]:{format_str}} {unit}',f'{m[key]-a[key]:+.{2}f} vs reference',delta_color='inverse')
-if result['feasible']:st.success('All configured nominal constraints pass')
-else:st.error('Constraint violation — this candidate is not acceptable under the selected envelope')
+if result['feasible']:st.success('Simulation converged — all configured nominal constraints pass')
+else:
+    st.warning('Simulation converged — one or more design limits fail. Results below remain available for comparison.')
+    guidance={
+        'HX_capacity':'Approximate rating screen, not a measured HX map. Check load, approach and coolant heat-capacity flow rate against the CDU rating.',
+        'HX_approach':'Facility supply must be at least the configured approach below rack supply. Lowering rack supply alone does not cool the facility water.',
+        'CDU_aggregate_flow':'Per-rack flow × served racks exceeds the selected CDU flow rating. Use a rated operating point or a substantiated larger CDU.',
+        'chip_assumed_target':'Upper chip estimate exceeds the assumed target. Check measured thermal resistance and cooling conditions; this is not verified NVIDIA throttling.',
+        'chip_entered_manufacturer_limit':'Upper chip estimate exceeds an entered manufacturer limit.',
+        'CDU_external_head':'Required pressure exceeds the external head rating. Check header, tubing, connectors and added restrictions.',
+        'pump_curve':'Required pressure exceeds the assumed pump curve at this flow. Check pump speed/curve and system resistance.',
+        'HX_hot_pinch':'Facility return is too warm relative to rack return. Check facility flow and supply temperature.',
+        'FWS_design_temperature_rise':'Facility-water rise exceeds the selected design allowance. Check facility flow and heat load.',
+        'FWS_return':'Facility return exceeds its configured ceiling. Check facility supply and flow.',
+        'header_velocity':'Header velocity exceeds its configured ceiling. Check diameter and rack flow.'}
+    failed=[dict(constraint=k,shortfall=-v['margin'],units=v['units'],explanation=guidance.get(k,'Calculated demand is outside this configured limit; inspect the constraint table and inputs.')) for k,v in result['constraints'].items() if not v['pass']]
+    st.dataframe(pd.DataFrame(failed),width='stretch',hide_index=True)
 st.caption('Reference stays at 115.56 kW, PG25, 40°C, 120 L/min with constant headers. Facility water is controlled independently. A nominal pass is an engineering screen, not hardware qualification.')
 st.info(result['qualification'])
 df=pd.DataFrame(result['trays']);ref=pd.DataFrame(baseline['trays'])

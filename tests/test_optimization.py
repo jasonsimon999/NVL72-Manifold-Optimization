@@ -33,4 +33,6 @@ def test_dashboard_interaction():
     assert not app.exception
     app.sidebar.slider[0].set_value(110).run()
     assert not app.exception
-    assert len(app.error)>0  # conservative HX derating rejects this full-load point
+    assert not app.error  # a design-limit failure is not a numerical error
+    assert any('Simulation converged' in x.value for x in app.warning)
+    assert any('HX_capacity' in frame.value.astype(str).to_string() for frame in app.dataframe)
