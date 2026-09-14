@@ -16,12 +16,12 @@ assert not app.exception, str(app.exception)
 import nvl72
 assert Path(nvl72.__file__).resolve().is_relative_to(root/'src')
 for flow in [110.,120.,125.,120.]:
-    app.sidebar.slider[0].set_value(flow).run()
+    next(x for x in app.slider if x.label=='Rack flow [L/min]').set_value(flow).run()
     assert not app.exception, str(app.exception)
 for fluid in ['water','EG50','PG25']:
-    app.sidebar.selectbox[0].set_value(fluid).run()
+    next(x for x in app.selectbox if x.label=='Coolant').set_value(fluid).run()
     assert not app.exception, str(app.exception)
-app.sidebar.selectbox[1].set_value('in_row').run()
+next(x for x in app.selectbox if x.label=='CDU').set_value('in_row').run()
 assert not app.exception, str(app.exception)
 next(b for b in app.button if b.label=='Show saved optimized result').click().run()
 assert not app.exception, str(app.exception)

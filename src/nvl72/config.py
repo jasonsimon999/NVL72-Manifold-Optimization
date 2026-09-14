@@ -76,12 +76,32 @@ def validate(c: dict) -> None:
     require(c['facility']['hx_model'] == 'rating_scaled', 'Supported HX model is rating_scaled')
     require(c['cdu']['capacity_W'] > 0 and c['cdu']['nominal_flow_LPM'] > 0 and c['cdu']['served_racks'] >= 1 and c['cdu']['approach_K'] > 0, 'Invalid CDU rating')
     require(0 < c['solver']['relaxation'] <= 1, 'Property relaxation must be in (0,1]')
+    for key in ('pressure_tolerance_Pa','mass_relative_tolerance','energy_relative_tolerance','temperature_tolerance_K','flow_relative_tolerance'):
+        require(c['solver'][key]>0,f'{key} must be positive')
+    for key in ('max_property_iterations','max_nfev'):
+        require(isinstance(c['solver'][key],int) and c['solver'][key]>0,f'{key} must be a positive integer')
+    require(isinstance(c['cdu']['served_racks'],int),'Served racks must be an integer')
+    limits=c['constraints']
+    require(min(limits['rack_flow_max_LPM'],limits['header_velocity_max_m_s'],limits['diameter_min_m'])>0,'Flow, velocity and minimum diameter limits must be positive')
+    require(limits['diameter_max_m']>=limits['diameter_min_m'],'Diameter limits are reversed')
+    require(all(v>0 for v in c['optimization']['normalization'].values()),'Objective normalization scales must be positive')
     for tray, override in c['branches']['overrides'].items():
         require(tray in layout, f'Unknown override tray {tray}')
         for key,value in override.items():
             if key in ('coldplate_K','qdc_K','restriction_K','tube_length_m','tube_multiplier'):
                 require(value >= 0, f'Negative branch input {tray}.{key}')
             if key == 'diameter_m': require(value > 0, f'Invalid diameter {tray}')
+    # Validate resolved class + per-tray inputs, including overrides of class bores.
+    from .quick_disconnect import mass_coefficient
+    for tray in layout:
+        b=merge(c['branches']['compute' if tray.startswith('C') else 'switch'],c['branches']['overrides'].get(tray,{}))
+        mass_coefficient(b,1020.)
+        if b.get('qdc_diameter_m') is not None:require(b['qdc_diameter_m']>0,f'{tray}: QD ID must be positive')
+        require(0<b.get('orifice_Cd',.62)<=1,f'{tray}: orifice Cd must be in (0,1]')
+        bore=b.get('orifice_diameter_m')
+        if bore is not None:
+            require(0<bore<b['diameter_m'],f'{tray}: Orifice bore must be positive and smaller than branch ID')
+            require(c.get('balancing_mode')!='auto_equivalent',f'{tray}: Automatic sizing cannot include fixed bores')
     if c['external']['enabled']:
         e = c['external']
         require(e['diameter_m'] > 0 and min(e['length_m'],e['minor_K'],e['equipment_K']) >= 0, 'Invalid external-loop dimensions or losses')

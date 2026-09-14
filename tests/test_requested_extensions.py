@@ -52,7 +52,7 @@ def test_dashboard_new_controls():
     st=pytest.importorskip('streamlit.testing.v1')
     from pathlib import Path
     app=st.AppTest.from_file(str(Path('dashboard.py').resolve()),default_timeout=30).run()
-    app.sidebar.selectbox[0].set_value('EG50').run()
+    next(x for x in app.selectbox if x.label=='Coolant').set_value('EG50').run()
     assert not app.exception
     assert any('EG50' in x.value for x in app.info)
     next(x for x in app.button if x.label=='Run coolant comparison').click().run()

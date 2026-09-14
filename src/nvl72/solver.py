@@ -17,6 +17,7 @@ from .coldplate import channel_model
 from .design_analysis import chip_estimates, CHIP_DEFAULTS
 from .constraint_policy import apply_policy
 from .orifices import bore_from_coefficient
+from .quick_disconnect import velocity as qdc_velocity
 from .units import c_to_k,k_to_c,lpm_to_m3s,m3s_to_lpm
 
 def solve(c: dict) -> dict:
@@ -141,6 +142,11 @@ def solve(c: dict) -> dict:
     for i,tray in enumerate(trays):
         bore=branches[i].get('orifice_diameter_m')
         density=float(coolant.properties((ts+tout[i])/2).rho)
+        tray['branch_ID_mm']=branches[i]['diameter_m']*1000
+        tray['branch_velocity_m_s']=float(m[i]/(density*np.pi*branches[i]['diameter_m']**2/4))
+        tray['QD_ID_mm']=branches[i].get('qdc_diameter_m',0)*1000 or None
+        tray['QD_velocity_m_s']=qdc_velocity(m[i],density,branches[i])
+        tray['QD_loss_model']='measured_curve' if 'qdc_curve' in branches[i] else branches[i].get('qdc_model','fixed')
         if c.get('balancing_mode')=='auto_equivalent':
             bore=bore_from_coefficient(branches[i]['restriction_K'],branches[i]['diameter_m'],density,branches[i].get('orifice_Cd',.62))
         tray['orifice_diameter_mm']=None if bore is None else bore*1000
@@ -162,7 +168,7 @@ def solve(c: dict) -> dict:
         for kind in ('compute','switch'): frozen['branches'][kind]['restriction_K']=0.
         for tray in trays:
             frozen['branches']['overrides'].setdefault(tray['tray_id'],{}).update(restriction_K=0.,orifice_diameter_m=None if tray['orifice_diameter_mm'] is None else tray['orifice_diameter_mm']/1000)
-    return {'config':c,'metrics':met,'trays':trays,'constraints':constraints,'feasible':all(v['pass'] for v in constraints.values() if v['enforced']),
+    return {'result_schema':3,'config':c,'metrics':met,'trays':trays,'constraints':constraints,'feasible':all(v['pass'] for v in constraints.values() if v['enforced']),
             'screening_pass':all(v['pass'] for v in constraints.values()),'fixed_orifice_config':frozen,
             'chip_estimates':chips,'qualification':'Design screening only: unverified chip resistances, component losses, pump envelope, HX performance and site limits'+('; EG50 CDU/material compatibility unverified' if c['coolant']['type']=='EG50' else ''),
             'facility':facility,'pressure_budget_Pa':budget,'hydraulics':asdict(hp),'coldplate':channel,

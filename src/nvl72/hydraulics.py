@@ -5,6 +5,7 @@ from scipy.optimize import root, least_squares
 from .components import pipe_loss, reduced_loss, curve_loss
 from .manifold import geometry
 from .orifices import coefficient, bore_from_coefficient
+from .quick_disconnect import mass_coefficient
 
 @dataclass
 class HydraulicResult:
@@ -24,6 +25,7 @@ class HydraulicResult:
 def solve_network(c, branches, total_mass, supply_props, branch_props, return_props, initial=None, evaluate_mass=None):
     z,dz,ds,dr = geometry(c); n = len(z)
     b = {key: np.array([item[key] for item in branches]) for key in ('diameter_m','tube_length_m','tube_multiplier','coldplate_K','qdc_K','restriction_K')}
+    b['qdc_K']=np.array([mass_coefficient(item,float(branch_props.rho[i])) for i,item in enumerate(branches)])
     minor = c['loss_coefficients']; rough = c['geometry']['roughness_m']
     hs = np.full(n, minor['header']['tee']); hr = hs.copy()
     hs[0] += minor['header']['entrance']; hr[0] += minor['header']['exit']
