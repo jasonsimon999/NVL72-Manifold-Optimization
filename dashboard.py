@@ -66,7 +66,7 @@ st.caption('Deltas compare with the selected reference. Smaller flow mismatch is
 failed=[dict(Check=k,Enforced=v.get('enforced',True),Shortfall=-v['margin'],Units=v['units'],Basis=v.get('basis','Historical policy')) for k,v in result['constraints'].items() if not v['pass']]
 hard=sum(x['Enforced'] for x in failed);advisory=len(failed)-hard
 if hard:st.error(f'Converged · {hard} enforced requirement(s) fail · {advisory} advisory screen(s) need review')
-elif advisory:st.warning(f'Converged · enforced requirements pass · {advisory} advisory screen(s) need review')
+elif advisory:st.warning(f'Simulation converged · enforced requirements pass · {advisory} advisory screen(s) need review')
 else:st.success('Converged · enforced requirements and advisory screens pass')
 if failed:
     with st.expander('Explain the shortfalls',expanded=bool(hard)):st.dataframe(pd.DataFrame(failed),hide_index=True,width='stretch')
@@ -78,24 +78,24 @@ overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Hydraulic
 with overview:
     filter_kind=st.radio('Trays to show',['All trays','Compute trays','Switch trays'],horizontal=True)
     visible=df if filter_kind=='All trays' else df[df.tray_type==('compute' if filter_kind=='Compute trays' else 'switch')]
-    st.subheader('Target versus actual flow')
-    st.caption('Grey = target · teal = actual. Side-by-side bars follow rack order; hover for exact values. Targets use the selected heat-proportional or equal-flow objective.')
-    st.vega_lite_chart(spec=charts.flow_comparison(visible),width='stretch')
-    with st.expander('Which trays receive too little or too much?'):
-        st.vega_lite_chart(spec=charts.flow_error(visible),width='stretch')
-        st.caption('Orange below zero = below target; teal above zero = above target. Flow error alone is not a thermal-limit failure.')
-    st.subheader('Coolant outlet temperature')
-    st.vega_lite_chart(spec=charts.temperature(visible,ref,c['constraints']['branch_outlet_max_C']),width='stretch')
-    st.caption('Teal = current · dashed grey = reference · orange = configured outlet ceiling. The temperature axis is expanded to show differences.')
-    with st.expander('Rack map'):
+    with st.expander('Rack map',expanded=True):
         from nvl72.plotting import rack_schematic
         import matplotlib.pyplot as plt
         metric=st.selectbox('Schematic color',['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'])
         fig=rack_schematic(result,metric);st.pyplot(fig);plt.close(fig)
         st.caption('Supply left, return right; C = compute, S = switch. Conceptual schematic, not CAD.')
+    st.subheader('Target versus actual flow')
+    st.caption('Grey = target · teal = actual. Side-by-side bars follow rack order; hover for exact values. Targets use the selected heat-proportional or equal-flow objective.')
+    st.pyplot(charts.flow_figure(visible),use_container_width=True)
+    with st.expander('Which trays receive too little or too much?'):
+        st.pyplot(charts.flow_error_figure(visible),use_container_width=True)
+        st.caption('Orange below zero = below target; teal above zero = above target. Flow error alone is not a thermal-limit failure.')
+    st.subheader('Coolant outlet temperature')
+    st.pyplot(charts.temperature_figure(visible,ref,c['constraints']['branch_outlet_max_C']),use_container_width=True)
+    st.caption('Teal = current · dashed grey = reference · orange = configured outlet ceiling. The temperature axis is expanded to show differences.')
 with hydraulics:
     st.subheader('Where the pump pressure goes')
-    st.vega_lite_chart(spec=charts.budget(result['pressure_budget_Pa']),width='stretch')
+    st.pyplot(charts.budget_figure(result['pressure_budget_Pa']),use_container_width=True)
     st.caption('Flow-weighted complete-path contributions. Parallel branches are not summed; signed buoyancy may reduce head.')
     st.subheader('Branch, QD and orifice dimensions')
     fields=['tray_id','branch_ID_mm','QD_ID_mm','orifice_diameter_mm','actual_flow_LPM','branch_velocity_m_s','QD_velocity_m_s','qdc_dP_kPa','orifice_dP_kPa','QD_loss_model']
@@ -107,7 +107,7 @@ with hydraulics:
         st.download_button('Download fixed-orifice design YAML',yaml.safe_dump(portable_config(result['fixed_orifice_config']),sort_keys=False),'fixed_orifice_design.yaml','text/yaml')
         st.caption('Automatic bores are redesigned for this operating point. Export fixed bores before testing unchanged hardware elsewhere.')
     with st.expander('Header pressures & pump curve'):
-        st.vega_lite_chart(spec=charts.header_pressure(df),width='stretch')
+        st.pyplot(charts.pressure_figure(df),use_container_width=True)
         from nvl72.cdu import pump_head
         from nvl72.units import lpm_to_m3s
         import matplotlib.pyplot as plt
