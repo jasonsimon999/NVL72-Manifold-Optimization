@@ -74,16 +74,20 @@ st.info(result['qualification'])
 if any(c['branches'][kind].get('qdc_model')=='fixed' or 'qdc_curve' in c['branches'][kind] for kind in ('compute','switch')):
     st.caption('Fixed/measured QD loss mode: changing QD ID changes reported bore velocity, not the fixed coefficient or measured curve.')
 
+# Persistent rack overview stays visible above every analysis tab.
+st.subheader('Rack map')
+from nvl72.plotting import rack_schematic
+import matplotlib.pyplot as plt
+metric=st.selectbox('Rack map color', ['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'], key='rack_map_metric')
+fig=rack_schematic(result,metric)
+st.pyplot(fig,use_container_width=False)
+plt.close(fig)
+st.caption('Supply left, return right; C = compute, S = switch. Conceptual schematic, not CAD. This map reflects the current configuration.')
+
 overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Hydraulics & bores','Chip temperatures','Compare & explore','Equations & data'])
 with overview:
     filter_kind=st.radio('Trays to show',['All trays','Compute trays','Switch trays'],horizontal=True)
     visible=df if filter_kind=='All trays' else df[df.tray_type==('compute' if filter_kind=='Compute trays' else 'switch')]
-    with st.expander('Rack map',expanded=True):
-        from nvl72.plotting import rack_schematic
-        import matplotlib.pyplot as plt
-        metric=st.selectbox('Schematic color',['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'])
-        fig=rack_schematic(result,metric);st.pyplot(fig);plt.close(fig)
-        st.caption('Supply left, return right; C = compute, S = switch. Conceptual schematic, not CAD.')
     st.subheader('Target versus actual flow')
     st.caption('Grey = target · teal = actual. Side-by-side bars follow rack order; hover for exact values. Targets use the selected heat-proportional or equal-flow objective.')
     st.pyplot(charts.flow_figure(visible),use_container_width=True)
