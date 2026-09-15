@@ -12,6 +12,7 @@ from . import dashboard_charts as charts
 
 def explore(c,result,baseline,pins,calculate,revision):
     st.subheader('Save designs for comparison')
+    st.caption('Pin a design you want to keep, change one input, then compare. Pinning saves a snapshot; it does not apply that design to the controls.')
     name=st.text_input('Design name',value=f'Design {len(pins)+1}',max_chars=60).strip()
     if st.button('Pin current design'):
         if not name or name=='Original reference':st.warning('Choose a nonempty name other than Original reference.')
@@ -22,8 +23,11 @@ def explore(c,result,baseline,pins,calculate,revision):
     named={'Reference':baseline,'Current':result,**{k:compatible_result(v) for k,v in pins.items()}}
     summary=pd.DataFrame(design_summary(named))
     fields=['design','flow_LPM','RMS_flow_error','outlet_max_C','pressure_kPa','pump_W','enforced_requirements_pass','all_screens_pass']
-    st.dataframe(summary[fields],hide_index=True,width='stretch')
-    st.caption('RMS_flow_error is a fraction (0.01 = 1%). Compare at matched load, fluid, supply, flow and weights. Pins last for this session; download designs to retain them.')
+    display=summary[fields].copy()
+    display['RMS_flow_error']*=100
+    display=display.rename(columns={'design':'Design','flow_LPM':'Flow · L/min','RMS_flow_error':'Flow mismatch · %','outlet_max_C':'Hottest outlet · °C','pressure_kPa':'Head · kPa','pump_W':'Pump · W','enforced_requirements_pass':'Requirements pass','all_screens_pass':'All screens pass'})
+    st.dataframe(display,hide_index=True,width='stretch')
+    st.caption('Lower flow mismatch is better. Compare at matched load, fluid, supply, flow and weights. Pins last for this session; download designs to retain them. Detailed exports retain their original field names and fractional RMS error.')
     with st.expander('Complete design analysis table'):st.dataframe(summary,hide_index=True,width='stretch')
     st.download_button('Download design summary CSV',summary.to_csv(index=False),'design_summary.csv','text/csv')
     with st.expander('Find a balanced candidate'):

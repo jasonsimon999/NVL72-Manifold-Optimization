@@ -14,6 +14,12 @@ def controls(root,base):
         flow=st.slider('Rack flow [L/min]',20.,300.,120.,1.,key='rack_flow',help='Total coolant volume through the rack each minute. More flow usually lowers coolant temperature rise but increases pumping effort. Pump mode solves its own flow.')
         diameter=st.slider('Main header ID [mm]',15.,65.,38.,.5,key='header_id',help='Main supply and return internal diameter, independent of tray QDs.')
         balancing=st.selectbox('Balancing representation',['Automatic equivalent orifices','Manual orifice bores','Resistance coefficients'],key='balancing')
+        if balancing=='Manual orifice bores':
+            st.caption('Enter a physical hole size for each tray type. Smaller holes add more resistance. Enter 0 for no plate.')
+        elif balancing=='Automatic equivalent orifices':
+            st.caption('Choose added resistance below; the model calculates an equivalent hole size. See Hydraulics & bores for the resulting dimensions.')
+        else:
+            st.caption('Study added resistance directly, without assigning a physical orifice bore.')
         with st.container(border=True):
             st.markdown('**Tray geometry**')
             st.caption('ID = internal diameter. Branch = tray hose; QD = quick disconnect; orifice = added balancing hole.')
@@ -39,6 +45,7 @@ def controls(root,base):
             compute=st.slider('Compute load fraction',.05,1.2,1.,.05)
             switch=st.slider('Switch load fraction',.05,1.2,1.,.05)
             operating=st.selectbox('Operating mode',['fixed_flow','pump'],help='Pump mode finds flow on an assumed curve; the flow slider is then an initial setting, not a prescribed output.')
+            if operating=='pump':st.info('Pump mode: the displayed result is the flow the assumed pump can deliver. The rack-flow slider does not prescribe that result.')
         with st.expander('Facility & CDU'):
             st.caption('The CDU transfers rack heat to facility water. These settings describe the separate building-water loop and the selected cooling unit.')
             cdu=st.selectbox('CDU',['in_rack','in_row'],key='cdu')
@@ -109,6 +116,7 @@ def controls(root,base):
                 c=apply_yaml_overrides(c,text)
                 st.warning('Expert overrides are active and take precedence over the controls above.')
         with st.expander('Saved study & maintenance'):
+            st.caption('The saved optimized result is a historical study. For your current experiments, use Compare & explore to pin designs.')
             if st.button('Show saved optimized result'):st.session_state['show_saved']=True
             if st.button('Clear calculation cache'):
                 st.cache_data.clear();st.session_state.pop('fluid_cases',None);st.rerun()

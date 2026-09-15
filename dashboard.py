@@ -28,6 +28,7 @@ div[data-testid="stTabs"] button {font-weight:600;}
 </style>''',unsafe_allow_html=True)
 st.title('Manifold lab')
 st.caption('NVL72 · Design, compare and understand your cooling network')
+st.caption('1. Adjust the design controls → 2. Check flow, temperature and pressure → 3. Save and compare promising designs.')
 REVISION=model_fingerprint(PROJECT_ROOT)
 
 @st.cache_data(max_entries=128,show_spinner=False)
@@ -51,7 +52,7 @@ except (ValueError,RuntimeError,TypeError,KeyError,AttributeError,yaml.YAMLError
     st.stop()
 
 pins=st.session_state.setdefault('design_pins',{})
-reference_name=st.selectbox('Compare current design against',['Original reference']+list(pins))
+reference_name=st.selectbox('Compare current design against',['Original reference']+list(pins),help='Sets the comparison for metric differences and reference curves. It does not replace your current inputs.')
 baseline=original if reference_name=='Original reference' else compatible_result(pins[reference_name])
 m=result['metrics'];a=baseline['metrics'];df=pd.DataFrame(result['trays']);ref=pd.DataFrame(baseline['trays'])
 st.caption(f"{m['heat_W']/1000:.2f} kW liquid load · {c['coolant']['type']} · {m['rack_flow_LPM']:.1f} L/min rack flow · {c['rack']['supply_C']:.1f}°C supply · {c['cdu']['served_racks']} rack(s) per CDU")
@@ -71,21 +72,23 @@ else:st.success('Converged · enforced requirements and advisory screens pass')
 if failed:
     with st.expander('Explain the shortfalls',expanded=bool(hard)):st.dataframe(pd.DataFrame(failed),hide_index=True,width='stretch')
 st.info(result['qualification'])
+with st.expander('How to read the status'):
+    st.write('Converged means the numerical balances solved. Enforced requirements are the configured limits used to accept or reject a design. Advisory screens flag uncertain assumptions or rating comparisons that need review. Passing these checks does not verify the installed hardware.')
 if any(c['branches'][kind].get('qdc_model')=='fixed' or 'qdc_curve' in c['branches'][kind] for kind in ('compute','switch')):
     st.caption('Fixed/measured QD loss mode: changing QD ID changes reported bore velocity, not the fixed coefficient or measured curve.')
 
 # Persistent overview stays below status notices and above every analysis tab.
 from nvl72.plotting import rack_schematic
 import matplotlib.pyplot as plt
-map_column,summary_column=st.columns([1,1.8],gap='large')
+map_column,summary_column=st.columns([1.15,1.65],gap='large')
 with map_column:
     st.subheader('Rack map')
     map_labels={'T_out_C':'Outlet temperature · °C','actual_flow_LPM':'Coolant flow · L/min','heat_load_W':'Tray heat · W','branch_dP_kPa':'Tray pressure drop · kPa','flow_error_percent':'Flow above/below target · %'}
     metric=st.selectbox('Color shows',list(map_labels),format_func=map_labels.get,key='rack_map_metric')
     fig=rack_schematic(result,metric)
-    fig.set_size_inches(4,5.5)
+    fig.set_size_inches(4.4,6)
     fig.axes[0].set_title('')
-    st.pyplot(fig,width=330)
+    st.pyplot(fig,width=390)
     plt.close(fig)
     st.caption('C = compute · S = switch. Supply left, return right. Colors show the selected value; layout is schematic.')
 with summary_column:
@@ -110,6 +113,8 @@ with summary_column:
     ]
     st.table(pd.DataFrame(summary_rows,columns=['Measure','Meaning','Current']).set_index('Measure'))
     st.caption('Positive outlet headroom is below the configured ceiling; negative is above it. This is coolant headroom, not chip-temperature margin.')
+    st.markdown('**What to look for**')
+    st.write('Aim for low flow mismatch while keeping temperatures and pump requirements within the configured limits. Adding a restriction can improve flow sharing but increases pumping effort.')
 
 overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Hydraulics & bores','Chip temperatures','Compare & explore','Equations & data'])
 with overview:
@@ -131,7 +136,8 @@ with hydraulics:
     st.caption('Flow-weighted complete-path contributions. Parallel branches are not summed; signed buoyancy may reduce head.')
     st.subheader('Branch, QD and orifice dimensions')
     fields=['tray_id','branch_ID_mm','QD_ID_mm','orifice_diameter_mm','actual_flow_LPM','branch_velocity_m_s','QD_velocity_m_s','qdc_dP_kPa','orifice_dP_kPa','QD_loss_model']
-    st.dataframe(df[[x for x in fields if x in df]],hide_index=True,width='stretch')
+    labels={'tray_id':'Tray','branch_ID_mm':'Branch ID · mm','QD_ID_mm':'QD bore · mm','orifice_diameter_mm':'Orifice bore · mm','actual_flow_LPM':'Flow · L/min','branch_velocity_m_s':'Tube speed · m/s','QD_velocity_m_s':'QD speed · m/s','qdc_dP_kPa':'QD loss · kPa','orifice_dP_kPa':'Orifice loss · kPa','QD_loss_model':'QD model'}
+    st.dataframe(df[[x for x in fields if x in df]].rename(columns=labels),hide_index=True,width='stretch')
     st.caption('All diameters are bores in mm. QD loss covers the complete assumed QD path. Blank orifice bore means no plate.')
     if result.get('fixed_orifice_config'):
         with st.expander('Automatic sizing details'):
