@@ -11,33 +11,36 @@ def controls(root,base):
     with st.sidebar:
         st.markdown('### Design controls')
         st.caption('Change a dimension → compare flow, temperatures and pump duty.')
-        flow=st.slider('Rack flow [L/min]',20.,300.,120.,1.,key='rack_flow')
+        flow=st.slider('Rack flow [L/min]',20.,300.,120.,1.,key='rack_flow',help='Total coolant volume through the rack each minute. More flow usually lowers coolant temperature rise but increases pumping effort. Pump mode solves its own flow.')
         diameter=st.slider('Main header ID [mm]',15.,65.,38.,.5,key='header_id',help='Main supply and return internal diameter, independent of tray QDs.')
         balancing=st.selectbox('Balancing representation',['Automatic equivalent orifices','Manual orifice bores','Resistance coefficients'],key='balancing')
         with st.container(border=True):
             st.markdown('**Tray geometry**')
+            st.caption('ID = internal diameter. Branch = tray hose; QD = quick disconnect; orifice = added balancing hole.')
             left,right=st.columns(2)
             values={}
             for kind,col,dflt in [('compute',left,8.),('switch',right,6.)]:
                 with col:
                     st.markdown(f'**{kind.title()}**')
-                    bd=st.number_input(f'{kind.title()} branch ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_branch')
+                    bd=st.number_input(f'{kind.title()} branch ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_branch',help='Inside diameter of this tray type’s tubing. A larger ID usually reduces tubing pressure loss; it does not change the QD or cold plate.')
                     qd=st.number_input(f'{kind.title()} QD ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_qd',help='Flow bore, not AN size. Diameter alone uses the assumed QD scaling below.')
                     if balancing=='Manual orifice bores':
                         bore=st.number_input(f'{kind.title()} orifice bore [mm; 0 none]',min_value=0.,max_value=30.,value=0.,step=.1,key=f'{kind}_bore',help='Applies to every tray of this class. Must be smaller than branch ID.')
                         kh=0.
                     else:
                         bore=0.
-                        kh=st.number_input(f'{kind.title()} restriction [million Pa/(kg/s)²]',min_value=0.,max_value=500.,value=0.,step=1.,key=f'{kind}_restriction')*1e6
+                        kh=st.number_input(f'{kind.title()} restriction [million Pa/(kg/s)²]',min_value=0.,max_value=500.,value=0.,step=1.,key=f'{kind}_restriction',help='Added resistance to flow. Larger values restrict this tray type more and give smaller equivalent bores in Automatic mode.')*1e6
                     values[kind]=(bd,qd,bore,kh)
             st.caption('Automatic: resistance → equivalent bore. Manual: enter the bore directly. Zero means no added plate.')
         with st.expander('Operating conditions & load'):
+            st.caption('Set the test conditions. TCS is the rack coolant loop; load fraction scales the modeled chip heat (1.0 = full reference load).')
             supply=st.slider('TCS supply [°C]',10.,60.,40.,.5,key='supply')
             coolant=st.selectbox('Coolant',['PG25','water','EG50','PG25_Dow2023'],key='coolant',help='PG25 is the legacy assumption profile. PG25_Dow2023 is a versioned manufacturer table. EG50 is not hardware-qualified.')
             compute=st.slider('Compute load fraction',.05,1.2,1.,.05)
             switch=st.slider('Switch load fraction',.05,1.2,1.,.05)
             operating=st.selectbox('Operating mode',['fixed_flow','pump'],help='Pump mode finds flow on an assumed curve; the flow slider is then an initial setting, not a prescribed output.')
         with st.expander('Facility & CDU'):
+            st.caption('The CDU transfers rack heat to facility water. These settings describe the separate building-water loop and the selected cooling unit.')
             cdu=st.selectbox('CDU',['in_rack','in_row'],key='cdu')
             c=load_config(root/'config/inrow.yaml') if cdu=='in_row' else deepcopy(base)
             racks=st.number_input('Racks served by CDU',1,32,1 if cdu=='in_rack' else 8,1)
@@ -50,6 +53,7 @@ def controls(root,base):
             ua=st.number_input('Evaluated HX UA [kW/K; 0 unknown]',min_value=0.,value=0.,step=1.)
             st.caption('Flow and duty apply to this CDU. More facility flow does not directly increase rack flow.')
         with st.expander('Hydraulic calibration & taper'):
+            st.caption('Use component data here when available. Taper reduces header size toward the tip; Cd describes how the orifice passes flow; Kh describes pressure loss.')
             taper=st.slider('Tip / main diameter ratio',.4,1.,1.,.01)
             gravity=st.checkbox('Include gravity',True)
             cd=st.number_input('Orifice Cd',.01,1.,.62,.01)

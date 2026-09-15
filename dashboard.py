@@ -74,22 +74,49 @@ st.info(result['qualification'])
 if any(c['branches'][kind].get('qdc_model')=='fixed' or 'qdc_curve' in c['branches'][kind] for kind in ('compute','switch')):
     st.caption('Fixed/measured QD loss mode: changing QD ID changes reported bore velocity, not the fixed coefficient or measured curve.')
 
-# Persistent rack overview stays visible above every analysis tab.
-st.subheader('Rack map')
+# Persistent overview stays below status notices and above every analysis tab.
 from nvl72.plotting import rack_schematic
 import matplotlib.pyplot as plt
-metric=st.selectbox('Rack map color', ['T_out_C','actual_flow_LPM','heat_load_W','branch_dP_kPa','flow_error_percent'], key='rack_map_metric')
-fig=rack_schematic(result,metric)
-st.pyplot(fig,use_container_width=False)
-plt.close(fig)
-st.caption('Supply left, return right; C = compute, S = switch. Conceptual schematic, not CAD. This map reflects the current configuration.')
+map_column,summary_column=st.columns([1,1.8],gap='large')
+with map_column:
+    st.subheader('Rack map')
+    map_labels={'T_out_C':'Outlet temperature · °C','actual_flow_LPM':'Coolant flow · L/min','heat_load_W':'Tray heat · W','branch_dP_kPa':'Tray pressure drop · kPa','flow_error_percent':'Flow above/below target · %'}
+    metric=st.selectbox('Color shows',list(map_labels),format_func=map_labels.get,key='rack_map_metric')
+    fig=rack_schematic(result,metric)
+    fig.set_size_inches(4,5.5)
+    fig.axes[0].set_title('')
+    st.pyplot(fig,width=330)
+    plt.close(fig)
+    st.caption('C = compute · S = switch. Supply left, return right. Colors show the selected value; layout is schematic.')
+with summary_column:
+    st.subheader('Design at a glance')
+    st.caption('Read the rack by tray type: does coolant reach the heat, and how hot does it leave?')
+    rows=[]
+    for kind,label in [('compute','Compute'),('switch','Switch')]:
+        group=df[df.tray_type==kind]
+        if group.empty:continue
+        rows.append({'Tray type':f'{label} ({len(group)})','Heat · kW':f'{group.heat_load_W.sum()/1000:.2f}',
+                     'Flow / target · L/min':f'{group.actual_flow_LPM.sum():.1f} / {group.target_flow_LPM.sum():.1f}',
+                     'Hottest outlet · °C':f'{group.T_out_C.max():.2f}'})
+    st.table(pd.DataFrame(rows).set_index('Tray type'))
+    st.caption('Flow / target is the total for that tray type. Target follows the selected balancing objective; individual trays can still differ.')
+    st.markdown('**Cooling and pressure**')
+    f=result['facility']
+    summary_rows=[
+        ('Rack coolant','Supply → mixed return',f"{c['rack']['supply_C']:.1f} → {m['T_return_C']:.1f} °C"),
+        ('Outlet headroom','Ceiling minus hottest tray',f"{c['constraints']['branch_outlet_max_C']-m['T_out_max_C']:+.2f} °C"),
+        ('Pump duty','Required flow at system pressure',f"{m['rack_flow_LPM']:.1f} L/min at {m['system_dp_Pa']/1000:.1f} kPa"),
+        ('Facility water','Supply → return, entire CDU',f"{f['FWS_supply_C']:.1f} → {f['FWS_return_C']:.1f} °C"),
+    ]
+    st.table(pd.DataFrame(summary_rows,columns=['Measure','Meaning','Current']).set_index('Measure'))
+    st.caption('Positive outlet headroom is below the configured ceiling; negative is above it. This is coolant headroom, not chip-temperature margin.')
 
 overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Hydraulics & bores','Chip temperatures','Compare & explore','Equations & data'])
 with overview:
     filter_kind=st.radio('Trays to show',['All trays','Compute trays','Switch trays'],horizontal=True)
     visible=df if filter_kind=='All trays' else df[df.tray_type==('compute' if filter_kind=='Compute trays' else 'switch')]
     st.subheader('Target versus actual flow')
-    st.caption('Grey = target · teal = actual. Side-by-side bars follow rack order; hover for exact values. Targets use the selected heat-proportional or equal-flow objective.')
+    st.caption('Grey = target · teal = actual. Compare each pair: short teal bars receive less than their target flow. Exact values are in Equations & data → Full tray results.')
     st.pyplot(charts.flow_figure(visible),use_container_width=True)
     with st.expander('Which trays receive too little or too much?'):
         st.pyplot(charts.flow_error_figure(visible),use_container_width=True)
@@ -98,6 +125,7 @@ with overview:
     st.pyplot(charts.temperature_figure(visible,ref,c['constraints']['branch_outlet_max_C']),use_container_width=True)
     st.caption('Teal = current · dashed grey = reference · orange = configured outlet ceiling. The temperature axis is expanded to show differences.')
 with hydraulics:
+    st.caption('Pressure drop is the pumping effort needed to move coolant through the rack. Larger bars identify the largest contributors.')
     st.subheader('Where the pump pressure goes')
     st.pyplot(charts.budget_figure(result['pressure_budget_Pa']),use_container_width=True)
     st.caption('Flow-weighted complete-path contributions. Parallel branches are not summed; signed buoyancy may reduce head.')
@@ -131,6 +159,7 @@ with hydraulics:
         st.caption('Flow covers all racks on this CDU. UA assumes counterflow. Primary pressure losses, control limits and unmodeled pump heat need vendor/site data.')
         st.json(f,expanded=False)
 with thermal:
+    st.caption('Estimated chip temperature combines coolant temperature, chip power and assumed thermal resistance. It is different from the coolant outlet temperature.')
     st.subheader('Estimated chip temperatures')
     chips=pd.DataFrame(result['chip_estimates'])
     chip_kind=st.selectbox('Chip temperature plot component',list(CHIP_DEFAULTS))
