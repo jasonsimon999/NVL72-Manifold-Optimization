@@ -1,0 +1,247 @@
+{"kind":"deck","id":"pr/wz1qp7","name":"Deck"}
+{"kind":"layout","layoutId":"046777fa-1bcf-466c-a697-b4f66a81490c","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"416da4c5-45a1-4a0d-995b-23bc23bb0dbc","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/zj4j1u","slide":1,"title":"MEAM 5020 Final Project","textShapes":3}
+{"kind":"textbox","id":"sh/1sve1wz2","slide":1,"text":"MEAM 5020 Final Project\nRack Manifold Optimization","textPreview":"MEAM 5020 Final Project | Rack Manifold Optimization","textChars":50,"textLines":2,"bbox":[108,169,795,126]}
+{"kind":"shape","id":"sh/0rmx8byh","slide":1,"bbox":[0,315,875,3]}
+{"kind":"shape","id":"sh/nedw36hs","slide":1,"bbox":[744,315,131,3]}
+{"kind":"textbox","id":"sh/md4fa1gn","slide":1,"text":"Constantin de Lint, David Kim, Jason Simon, Sam Vasington","textPreview":"Constantin de Lint, David Kim, Jason Simon, Sam Vasington","textChars":57,"textLines":1,"bbox":[108,341,780,40]}
+{"kind":"textbox","id":"sh/9gfe5gzy","slide":1,"text":"Assignment 4: Previous work, design changes, and calculation plan","textPreview":"Assignment 4: Previous work, design changes, and calculation plan","textChars":65,"textLines":1,"bbox":[108,392,755,40]}
+{"kind":"image","id":"im/v25gr290","slide":1,"name":"","alt":"Penn shield from template","bbox":[21,16,323,363]}
+{"kind":"image","id":"im/5s7yxcr2","slide":1,"name":"","alt":"Penn Engineering cover logo","bbox":[691,451,186,68]}
+{"kind":"notes","id":"nt/zj4j1u","slide":1,"text":"Template supplied by the user: MEAM 5020 Final Project (1).pdf. The supplied group names are retained. The PDF design is rebuilt as editable slide elements, with original brand assets. This is an NVL72-inspired design study, not a validated NVIDIA product design."}
+{"kind":"slide","id":"sl/rs7c8m","slide":2,"title":"Coolant Distribution Across an AI Rack","textShapes":14}
+{"kind":"textbox","id":"sh/v29k3yps","slide":2,"text":"Coolant Distribution Across an AI Rack","textPreview":"Coolant Distribution Across an AI Rack","textChars":38,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/a103at87","slide":2,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/90r21o7m","slide":2,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/ny9kzepg","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/mx03698v","slide":2,"text":"[4] [7]  Sources and calculation details in speaker notes.","textPreview":"[4] [7]  Sources and calculation details in speaker notes.","textChars":58,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"shape","id":"sh/lw72x47q","slide":2,"bbox":[65,160,18.36,224.4]}
+{"kind":"shape","id":"sh/0vyl4zq5","slide":2,"bbox":[355.7,160,18.36,224.4]}
+{"kind":"shape","id":"sh/2xcbilcf","slide":2,"bbox":[83.36,207.94,272.34,0]}
+{"kind":"shape","id":"sh/nylcrqd0","slide":2,"bbox":[161.9,190.6,137.7,34.68]}
+{"kind":"textbox","id":"sh/ozutkvu5","slide":2,"text":"Compute","textPreview":"Compute","textChars":7,"textLines":1,"bbox":[171.08,194.68,127.5,25.5]}
+{"kind":"shape","id":"sh/p03ut0vq","slide":2,"bbox":[83.36,275.26,272.34,0]}
+{"kind":"shape","id":"sh/etsbelc3","slide":2,"bbox":[161.9,257.92,137.7,34.68]}
+{"kind":"textbox","id":"sh/fu1snqdo","slide":2,"text":"Switch","textPreview":"Switch","textChars":6,"textLines":1,"bbox":[171.08,262,127.5,25.5]}
+{"kind":"shape","id":"sh/gvutgvu9","slide":2,"bbox":[83.36,342.58,272.34,0]}
+{"kind":"shape","id":"sh/1w3up0vu","slide":2,"bbox":[161.9,325.24,137.7,34.68]}
+{"kind":"textbox","id":"sh/65sba1w7","slide":2,"text":"Compute","textPreview":"Compute","textChars":7,"textLines":1,"bbox":[171.08,329.32,127.5,25.5]}
+{"kind":"textbox","id":"sh/r61sj6ds","slide":2,"text":"Supply","textPreview":"Supply","textChars":6,"textLines":1,"bbox":[55.82,129.4,96.9,25.5]}
+{"kind":"textbox","id":"sh/vax8r2tk","slide":2,"text":"Return","textPreview":"Return","textChars":6,"textLines":1,"bbox":[337.34,129.4,102,25.5]}
+{"kind":"shape","id":"sh/u9orihsz","slide":2,"bbox":[67.04,346.66,13.26,26.52]}
+{"kind":"shape","id":"sh/hczqtcba","slide":2,"bbox":[358.76,346.66,13.26,26.52]}
+{"kind":"textbox","id":"sh/wb69k7a5","slide":2,"text":"Purpose","textPreview":"Purpose","textChars":7,"textLines":1,"bbox":[445,110,465,28]}
+{"kind":"textbox","id":"sh/jeh8vmtg","slide":2,"text":"Deliver the cooling flow each tray needs while limiting pressure loss and pump power.","textPreview":"Deliver the cooling flow each tray needs while limiting pressure loss and pump power.","textChars":85,"textLines":1,"bbox":[445,144,465,70]}
+{"kind":"textbox","id":"sh/id8rmhsv","slide":2,"text":"How it works","textPreview":"How it works","textChars":12,"textLines":1,"bbox":[445,235,465,28]}
+{"kind":"textbox","id":"sh/50zqxwbm","slide":2,"text":"A supply header feeds parallel tray branches. Cold plates absorb heat; a return header carries it to the CDU heat exchanger.","textPreview":"A supply header feeds parallel tray branches. Cold plates absorb heat; a return header carries it to the CDU heat exchanger.","textChars":124,"textLines":1,"bbox":[445,269,465,70]}
+{"kind":"textbox","id":"sh/4zq9ora1","slide":2,"text":"18 compute trays + 9 switch trays\n72 GPUs + 36 CPUs","textPreview":"18 compute trays + 9 switch trays | 72 GPUs + 36 CPUs","textChars":51,"textLines":2,"bbox":[58,404,395,55]}
+{"kind":"textbox","id":"sh/zid8jitc","slide":2,"text":"Different heat loads and flow resistances create different cooling needs.","textPreview":"Different heat loads and flow resistances create different cooling needs.","textChars":73,"textLines":1,"bbox":[445,370,462,67]}
+{"kind":"image","id":"im/947q94v2","slide":2,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/x8rqd4vy","slide":2,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/rs7c8m","slide":2,"text":"\n\n[4] NVIDIA. DGX GB Rack Scale Systems User Guide, Hardware. https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/w70fmd","slide":3,"title":"Three Approaches From Previous Work","textShapes":3}
+{"kind":"textbox","id":"sh/alkfy5wz","slide":3,"text":"Three Approaches From Previous Work","textPreview":"Three Approaches From Previous Work","textChars":35,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/vmtwraxk","slide":3,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/kr2x4fe1","slide":3,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/ipkf25wb","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/jqtwvaxw","slide":3,"text":"[1] [2] [3]  Sources and calculation details in speaker notes.","textPreview":"[1] [2] [3]  Sources and calculation details in speaker notes.","textChars":62,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"table","id":"tb/lgrm5ove","slide":3,"name":"","rows":4,"cols":3,"preview":"Previous approach | Evidence | Use in this project","bbox":[42,111,875,322]}
+{"kind":"image","id":"im/cjelcfa9","slide":3,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/oful8vad","slide":3,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/w70fmd","slide":3,"text":"The three core references are original research. Study [1] is the selected baseline method. Reported nonuniformity in [2] is its own metric, not the project RMS metric.\n\n[1] Sogunuru A, Menon YK, Niranjanappa AC, Reddy KH. Numerical and Experimental Investigations on Patterned Flow Distribution through Manifolds in Electronics Cooling. IJMPERD. 2020;10(2):975–986. https://scispace.com/pdf/numerical-and-experimental-investigations-of-patterned-flow-6skn0d5dfr.pdf\n[2] Hassan JM, Mohamed TA, Mohammed WS, Alawee WH. Modeling the Uniformity of Manifold with Various Configurations. Journal of Fluids. 2014;325259. https://doi.org/10.1155/2014/325259\n[3] Anbumeenakshi C, Thansekhar MR. Experimental investigation of header shape and inlet configuration on flow maldistribution in microchannel. Experimental Thermal and Fluid Science. 2016;75:156–161. https://doi.org/10.1016/j.expthermflusci.2016.02.004"}
+{"kind":"slide","id":"sl/9tft9j","slide":4,"title":"Selected Baseline: Patterned Orifice Sizing","textShapes":8}
+{"kind":"textbox","id":"sh/1g3u1kru","slide":4,"text":"Selected Baseline: Patterned Orifice Sizing","textPreview":"Selected Baseline: Patterned Orifice Sizing","textChars":43,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/gfutsfa9","slide":4,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/3i5c3u90","slide":4,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/pknu54r6","slide":4,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/ojetwzal","slide":4,"text":"[1] [7]  Sources and calculation details in speaker notes.","textPreview":"[1] [7]  Sources and calculation details in speaker notes.","textChars":58,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/ilsbi5sb","slide":4,"text":"Why this baseline?","textPreview":"Why this baseline?","textChars":18,"textLines":1,"bbox":[567,111,350,35]}
+{"kind":"textbox","id":"sh/ofidsr2l","slide":4,"text":"It directly links unequal electronics heat loads to individually sized restrictions.","textPreview":"It directly links unequal electronics heat loads to individually sized restrictions.","textChars":84,"textLines":1,"bbox":[567,156,342,89]}
+{"kind":"textbox","id":"sh/pgbu1w36","slide":4,"text":"Our extension","textPreview":"Our extension","textChars":13,"textLines":1,"bbox":[567,269,340,35]}
+{"kind":"textbox","id":"sh/2t0bqhkv","slide":4,"text":"Couple 27 tray branches to temperature-dependent properties, component losses, and CDU limits.","textPreview":"Couple 27 tray branches to temperature-dependent properties, component losses, and CDU limits.","textChars":94,"textLines":1,"bbox":[567,313,345,102]}
+{"kind":"textbox","id":"sh/3e9czmlg","slide":4,"text":"Rack geometry is assumed; reproducing the literature benchmark is a future validation step.","textPreview":"Rack geometry is assumed; reproducing the literature benchmark is a future validation step.","textChars":91,"textLines":1,"bbox":[43,427,871,32]}
+{"kind":"table","id":"tb/y5kvqd8v","slide":4,"name":"","rows":5,"cols":2,"preview":"Published setup [1] | Value","bbox":[42,112,488,279]}
+{"kind":"image","id":"im/r61svy9o","slide":4,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/32h8ry9s","slide":4,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/9tft9j","slide":4,"text":"Reference [1], sections 3–6 and Table 1. Its narrative and Table 2 disagree on experimental deviation, so no accuracy percentage is adopted. The paper benchmark has not yet been reproduced by our code.\n\n[1] Sogunuru A, Menon YK, Niranjanappa AC, Reddy KH. Numerical and Experimental Investigations on Patterned Flow Distribution through Manifolds in Electronics Cooling. IJMPERD. 2020;10(2):975–986. https://scispace.com/pdf/numerical-and-experimental-investigations-of-patterned-flow-6skn0d5dfr.pdf\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/xsymqb","slide":5,"title":"Physical Changes to the Manifold","textShapes":15}
+{"kind":"textbox","id":"sh/lgfmp4b2","slide":5,"text":"Physical Changes to the Manifold","textPreview":"Physical Changes to the Manifold","textChars":32,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/0f6lgzuh","slide":5,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/nix4ret8","slide":5,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/94zmtoby","slide":5,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/8jqlkjut","slide":5,"text":"[1] [7]  Sources and calculation details in speaker notes.","textPreview":"[1] [7]  Sources and calculation details in speaker notes.","textChars":58,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"shape","id":"sh/3mdkfado","slide":5,"bbox":[63,175,16.38,200.2]}
+{"kind":"shape","id":"sh/2l436pcj","slide":5,"bbox":[322.35,175,16.38,200.2]}
+{"kind":"shape","id":"sh/k76tcr21","slide":5,"bbox":[79.38,217.77,242.97,0]}
+{"kind":"shape","id":"sh/l8falwjm","slide":5,"bbox":[149.45,202.3,122.85,30.94]}
+{"kind":"textbox","id":"sh/y5obahkv","slide":5,"text":"Compute","textPreview":"Compute","textChars":7,"textLines":1,"bbox":[157.64,205.94,113.75,22.75]}
+{"kind":"shape","id":"sh/j6xsjm1g","slide":5,"bbox":[107.59,208.67,7.28,18.2]}
+{"kind":"shape","id":"sh/8vqtgr2d","slide":5,"bbox":[93.94,199.57,36.4,36.4]}
+{"kind":"shape","id":"sh/twzapwji","slide":5,"bbox":[79.38,277.83,242.97,0]}
+{"kind":"shape","id":"sh/6tobehk7","slide":5,"bbox":[149.45,262.36,122.85,30.94]}
+{"kind":"textbox","id":"sh/7uxsnm1s","slide":5,"text":"Switch","textPreview":"Switch","textChars":6,"textLines":1,"bbox":[157.64,266,113.75,22.75]}
+{"kind":"shape","id":"sh/ozm9k72t","slide":5,"bbox":[107.59,268.73,7.28,18.2]}
+{"kind":"shape","id":"sh/90vadsje","slide":5,"bbox":[93.94,259.63,36.4,36.4]}
+{"kind":"shape","id":"sh/pwnqhov2","slide":5,"bbox":[79.38,337.89,242.97,0]}
+{"kind":"shape","id":"sh/ove98jux","slide":5,"bbox":[149.45,322.42,122.85,30.94]}
+{"kind":"textbox","id":"sh/3u58fedc","slide":5,"text":"Compute","textPreview":"Compute","textChars":7,"textLines":1,"bbox":[157.64,326.06,113.75,22.75]}
+{"kind":"shape","id":"sh/2twr6tcr","slide":5,"bbox":[107.59,328.79,7.28,18.2]}
+{"kind":"shape","id":"sh/d07ql8ve","slide":5,"bbox":[93.94,319.69,36.4,36.4]}
+{"kind":"textbox","id":"sh/cze9c3ut","slide":5,"text":"Supply","textPreview":"Supply","textChars":6,"textLines":1,"bbox":[54.81,147.7,86.45,22.75]}
+{"kind":"textbox","id":"sh/by58jyd8","slide":5,"text":"Return","textPreview":"Return","textChars":6,"textLines":1,"bbox":[305.97,147.7,91,22.75]}
+{"kind":"shape","id":"sh/qxwratcn","slide":5,"bbox":[64.82,341.53,11.83,23.66]}
+{"kind":"shape","id":"sh/lo7qp8ba","slide":5,"bbox":[325.08,341.53,11.83,23.66]}
+{"kind":"textbox","id":"sh/0ny9g3up","slide":5,"text":"Replaceable orifice inserts","textPreview":"Replaceable orifice inserts","textChars":27,"textLines":1,"bbox":[454,119,450,33]}
+{"kind":"textbox","id":"sh/i9sna5s7","slide":5,"text":"Set compute and switch bores separately; allow a different bore at each tray.","textPreview":"Set compute and switch bores separately; allow a different bore at each tray.","textChars":77,"textLines":1,"bbox":[454,160,453,65]}
+{"kind":"shape","id":"sh/ja1ojats","slide":5,"bbox":[106,176,12,22]}
+{"kind":"textbox","id":"sh/kba5cfad","slide":5,"text":"Header diameter and taper","textPreview":"Header diameter and taper","textChars":25,"textLines":1,"bbox":[454,242,450,33]}
+{"kind":"textbox","id":"sh/5cj6lkby","slide":5,"text":"Adjust the main passage to manage pressure variation along the rack.","textPreview":"Adjust the main passage to manage pressure variation along the rack.","textChars":68,"textLines":1,"bbox":[454,283,448,62]}
+{"kind":"shape","id":"sh/6xsnepsj","slide":5,"bbox":[48,172,50,220]}
+{"kind":"shape","id":"sh/7y1onut4","slide":5,"bbox":[13,303,42,14]}
+{"kind":"textbox","id":"sh/sza5gfap","slide":5,"text":"Branch and QD passage sizes","textPreview":"Branch and QD passage sizes","textChars":27,"textLines":1,"bbox":[454,367,457,33]}
+{"kind":"textbox","id":"sh/t0j6pkbu","slide":5,"text":"Vary flow area; verify with measured loss curves.","textPreview":"Vary flow area; verify with measured loss curves.","textChars":49,"textLines":1,"bbox":[454,405,452,58]}
+{"kind":"textbox","id":"sh/u1cnipsf","slide":5,"text":"Schematic, not to scale","textPreview":"Schematic, not to scale","textChars":23,"textLines":1,"bbox":[64,421,324,28]}
+{"kind":"image","id":"im/7u5gje18","slide":5,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/vipgny1k","slide":5,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/xsymqb","slide":5,"text":"Conceptual editable diagram, not a dimensioned NVIDIA drawing. Red circles identify added replaceable orifice inserts. Header sizing/taper and quick disconnect bore are additional design variables. Three representative branches stand for 27.\n\n[1] Sogunuru A, Menon YK, Niranjanappa AC, Reddy KH. Numerical and Experimental Investigations on Patterned Flow Distribution through Manifolds in Electronics Cooling. IJMPERD. 2020;10(2):975–986. https://scispace.com/pdf/numerical-and-experimental-investigations-of-patterned-flow-6skn0d5dfr.pdf\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/rzbdiz","slide":6,"title":"Goal and Design","textShapes":3}
+{"kind":"textbox","id":"sh/adwza1kr","slide":6,"text":"Goal and Design","textPreview":"Goal and Design","textChars":15,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/vepg361c","slide":6,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/8beh8b21","slide":6,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/m9wz61kv","slide":6,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/na5gz61g","slide":6,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"table","id":"tb/pkz2lsji","slide":6,"name":"","rows":8,"cols":2,"preview":"Project item | Definition","bbox":[42,104,875,337]}
+{"kind":"image","id":"im/87ixknah","slide":6,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/gvixo7at","slide":6,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/rzbdiz","slide":6,"text":"Targets shown here are proposed study criteria, not measured product specifications. Compare candidates at matched coolant, total rack flow, inlet temperature, and heat load. A flow error metric must use heat-proportional targets rather than equal flow.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/4hi4py","slide":7,"title":"Rack Calculation Inputs and Assumptions","textShapes":3}
+{"kind":"textbox","id":"sh/zad83e10","slide":7,"text":"Rack Calculation Inputs and Assumptions","textPreview":"Rack Calculation Inputs and Assumptions","textChars":39,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/y94rutkf","slide":7,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/90fa98j2","slide":7,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/7yx87y1w","slide":7,"text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/mx4rytkr","slide":7,"text":"[4] [7]  Sources and calculation details in speaker notes.","textPreview":"[4] [7]  Sources and calculation details in speaker notes.","textChars":58,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"table","id":"tb/k3qp0v2x","slide":7,"name":"","rows":7,"cols":3,"preview":"Input | Study value | Evidence status","bbox":[42,109,875,326]}
+{"kind":"image","id":"im/lcbqlob2","slide":7,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/xobqh4b6","slide":7,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/4hi4py","slide":7,"text":"These inputs reproduce config/baseline.yaml and config/optimized_example.yaml. Electrical component power is treated as heat entering coolant in this scenario. Actual liquid heat capture and switch load need measurements. Legacy PG25 is retained to reproduce the earlier study, not endorsed over manufacturer properties.\n\n[4] NVIDIA. DGX GB Rack Scale Systems User Guide, Hardware. https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/ia24sz","slide":8,"title":"Mass Balance and Heat-Proportional Flow","textShapes":11}
+{"kind":"textbox","id":"sh/e58zaxwb","slide":8,"text":"Mass Balance and Heat-Proportional Flow","textPreview":"Mass Balance and Heat-Proportional Flow","textChars":39,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/f61032dw","slide":8,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/s3qh8nel","slide":8,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/618z6dwf","slide":8,"text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/r2hgzix0","slide":8,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/czuhk7ep","slide":8,"text":"1. Conserve coolant at every junction","textPreview":"1. Conserve coolant at every junction","textChars":37,"textLines":1,"bbox":[44,107,865,28]}
+{"kind":"textbox","id":"sh/d03idcva","slide":8,"text":"Σ ṁin = Σ ṁout        and        Σ ṁi = ṁrack","textPreview":"Σ ṁin = Σ ṁout        and        Σ ṁi = ṁrack","textChars":49,"textLines":1,"bbox":[44,141,865,70]}
+{"kind":"textbox","id":"sh/1k7i5gr6","slide":8,"text":"2. Allocate flow according to heat","textPreview":"2. Allocate flow according to heat","textChars":34,"textLines":1,"bbox":[44,214,865,28]}
+{"kind":"textbox","id":"sh/0je1wbal","slide":8,"text":"ṁi* = ṁrack × Q̇i / Σ Q̇i","textPreview":"ṁi* = ṁrack × Q̇i / Σ Q̇i","textChars":27,"textLines":1,"bbox":[44,248,865,70]}
+{"kind":"textbox","id":"sh/fi503690","slide":8,"text":"At 120 L/min: compute target = 6.02 L/min per tray; switch = 1.29 L/min.","textPreview":"At 120 L/min: compute target = 6.02 L/min per tray; switch = 1.29 L/min.","textChars":72,"textLines":1,"bbox":[44,298,860,35]}
+{"kind":"textbox","id":"sh/exwju1sf","slide":8,"text":"3. Solve each tray energy balance","textPreview":"3. Solve each tray energy balance","textChars":33,"textLines":1,"bbox":[44,353,865,28]}
+{"kind":"textbox","id":"sh/dwni1wru","slide":8,"text":"Q̇i = ṁi [h(Tout,i) − h(Tin)]        h(T) = ∫ cp(T) dT","textPreview":"Q̇i = ṁi [h(Tout,i) − h(Tin)]        h(T) = ∫ cp(T) dT","textChars":55,"textLines":1,"bbox":[44,387,865,70]}
+{"kind":"textbox","id":"sh/sve1sra9","slide":8,"text":"Flow error (%) = 100 √{(1/n) Σ [(ṁi / ṁi*) − 1]²}","textPreview":"Flow error (%) = 100 √{(1/n) Σ [(ṁi / ṁi*) − 1]²}","textChars":51,"textLines":1,"bbox":[44,428,865,28]}
+{"kind":"image","id":"im/0fml4byt","slide":8,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/cr2l0byh","slide":8,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/ia24sz","slide":8,"text":"Notation: ṁ = mass flow (kg/s), Q̇ = thermal power (W), V̇ = volume flow (m³/s), h = specific enthalpy (J/kg), cp = specific heat (J/kg/K). Common inlet state makes inlet-reference volume targets proportional to heat. Exact thermal calculation integrates the tabulated cp(T).\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/qfvuyz","slide":9,"title":"Pressure Loss and Orifice Sizing","textShapes":13}
+{"kind":"textbox","id":"sh/m183i94f","slide":9,"text":"Pressure Loss and Orifice Sizing","textPreview":"Pressure Loss and Orifice Sizing","textChars":32,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/n2hkrulk","slide":9,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/0zqlgzm9","slide":9,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/ex83ep43","slide":9,"text":"9","textPreview":"9","textChars":1,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/zyhknulo","slide":9,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/kvulsjmd","slide":9,"text":"Pipe and fitting losses","textPreview":"Pipe and fitting losses","textChars":23,"textLines":1,"bbox":[43,106,445,32]}
+{"kind":"textbox","id":"sh/5w3m1o3y","slide":9,"text":"Δp = (f L/D + ΣK) ρv²/2\nRe = ρvD/μ","textPreview":"Δp = (f L/D + ΣK) ρv²/2 | Re = ρvD/μ","textChars":34,"textLines":2,"bbox":[43,148,437,74]}
+{"kind":"textbox","id":"sh/94n6t47e","slide":9,"text":"Use 64/Re in laminar flow; a Haaland relation in turbulent flow, with a transition blend.","textPreview":"Use 64/Re in laminar flow; a Haaland relation in turbulent flow, with a transition blend.","textChars":89,"textLines":1,"bbox":[43,233,411,77]}
+{"kind":"textbox","id":"sh/83e5kz69","slide":9,"text":"Network closure","textPreview":"Network closure","textChars":15,"textLines":1,"bbox":[43,330,431,32]}
+{"kind":"textbox","id":"sh/n25orupo","slide":9,"text":"Each complete supply–tray–return path has the same end-to-end pressure difference. Include elevation head.","textPreview":"Each complete supply–tray–return path has the same end-to-end pressure difference. Include elevation head.","textChars":106,"textLines":1,"bbox":[43,371,415,82]}
+{"kind":"textbox","id":"sh/m1cnipo3","slide":9,"text":"Permanent orifice loss","textPreview":"Permanent orifice loss","textChars":22,"textLines":1,"bbox":[502,106,412,32]}
+{"kind":"textbox","id":"sh/1036p47i","slide":9,"text":"Δporifice = Kh ṁ²\nβ = d/D     Ao = πd²/4","textPreview":"Δporifice = Kh ṁ² | β = d/D     Ao = πd²/4","textChars":41,"textLines":2,"bbox":[502,148,415,75]}
+{"kind":"textbox","id":"sh/0zu5gz6x","slide":9,"text":"Kh = [√(1 − β⁴(1 − Cd²)) − Cd β²]²\n                 / (2ρ Cd² Ao²)","textPreview":"Kh = [√(1 − β⁴(1 − Cd²)) − Cd β²]² |                  / (2ρ Cd² Ao²)","textChars":66,"textLines":2,"bbox":[502,235,415,79]}
+{"kind":"textbox","id":"sh/zylonupc","slide":9,"text":"For required Kh, invert this relation to obtain bore d. Smaller bores increase resistance.","textPreview":"For required Kh, invert this relation to obtain bore d. Smaller bores increase resistance.","textChars":90,"textLines":1,"bbox":[502,337,415,77]}
+{"kind":"textbox","id":"sh/edcnepor","slide":9,"text":"0 < d < D; Cd = 0.62 is assumed.","textPreview":"0 < d < D; Cd = 0.62 is assumed.","textChars":32,"textLines":1,"bbox":[502,423,415,28]}
+{"kind":"image","id":"im/ovu14f2x","slide":9,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/wzu18f2t","slide":9,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/qfvuyz","slide":9,"text":"Equations implemented in components.py and orifices.py. Kh has units Pa/(kg/s)^2 and differs from dimensionless minor-loss K. Cd = 0.62 is a screening assumption for a thin, sharp-edged plate. The permanent-loss relation accounts for recovery; pressure-tap differential alone is not permanent loss. Header model omits 3D tee momentum recovery.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/a6liyd","slide":10,"title":"Pump and Facility Heat-Exchanger Balance","textShapes":10}
+{"kind":"textbox","id":"sh/6t4fe1gn","slide":10,"text":"Pump and Facility Heat-Exchanger Balance","textPreview":"Pump and Facility Heat-Exchanger Balance","textChars":40,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/rudg76h8","slide":10,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/gj6xkbyp","slide":10,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/exofi1gz","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/fixgb6hk","slide":10,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/on6xoby1","slide":10,"text":"Pump operating point and electrical power","textPreview":"Pump operating point and electrical power","textChars":41,"textLines":1,"bbox":[44,105,865,28]}
+{"kind":"textbox","id":"sh/pozyhgfm","slide":10,"text":"Δppump = Δp0 N² − aV̇² = Δpsystem        Pe = Δp V̇ / η","textPreview":"Δppump = Δp0 N² − aV̇² = Δpsystem        Pe = Δp V̇ / η","textChars":55,"textLines":1,"bbox":[44,139,865,70]}
+{"kind":"textbox","id":"sh/d03adwbe","slide":10,"text":"Fixed-flow mode evaluates the head required. Pump mode solves the curve intersection.","textPreview":"Fixed-flow mode evaluates the head required. Pump mode solves the curve intersection.","textChars":85,"textLines":1,"bbox":[44,189,868,31]}
+{"kind":"textbox","id":"sh/czu9kbut","slide":10,"text":"Facility water removes the rack heat","textPreview":"Facility water removes the rack heat","textChars":36,"textLines":1,"bbox":[44,240,865,28]}
+{"kind":"textbox","id":"sh/rylsb6t8","slide":10,"text":"Q̇HX = Σ Q̇i = ṁFWS [h(TFWS,out) − h(TFWS,in)]","textPreview":"Q̇HX = Σ Q̇i = ṁFWS [h(TFWS,out) − h(TFWS,in)]","textChars":47,"textLines":1,"bbox":[44,274,865,70]}
+{"kind":"textbox","id":"sh/qxcri1cn","slide":10,"text":"Heat-exchanger conductance required","textPreview":"Heat-exchanger conductance required","textChars":35,"textLines":1,"bbox":[44,347,865,28]}
+{"kind":"textbox","id":"sh/1onahgba","slide":10,"text":"UArequired = Q̇HX / ΔTlm        ΔTlm = (ΔT1 − ΔT2) / ln(ΔT1/ΔT2)","textPreview":"UArequired = Q̇HX / ΔTlm        ΔTlm = (ΔT1 − ΔT2) / ln(ΔT1/ΔT2)","textChars":64,"textLines":1,"bbox":[44,381,865,70]}
+{"kind":"image","id":"im/kzu9g76t","slide":10,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/8nu9kr6p","slide":10,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/a6liyd","slide":10,"text":"Pump curve uses an assumed parabolic shape fitted to a nominal point and assumed shutoff head. It is not a measured manufacturer curve. Pinches: ΔT1 = rack return minus facility return; ΔT2 = rack supply minus facility supply. Both must be positive. Equal terminal differences use the continuous LMTD limit. No ambient heat loss or pump heat is included in the quoted rack balance.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/926dph","slide":11,"title":"Flow Redistribution Matches Cooling Demand","textShapes":6}
+{"kind":"textbox","id":"sh/e1kfm5oj","slide":11,"text":"Flow Redistribution Matches Cooling Demand","textPreview":"Flow Redistribution Matches Cooling Demand","textChars":42,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/z2tgfap4","slide":11,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/cf2xkv6d","slide":11,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/qd0fi5o7","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/re9wbqps","slide":11,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/pcre9072","slide":11,"text":"Same total flow","textPreview":"Same total flow","textChars":15,"textLines":1,"bbox":[685,131,240,33]}
+{"kind":"textbox","id":"sh/d4zelkra","slide":11,"text":"Restricting over-supplied switch branches redirects coolant to compute trays.","textPreview":"Restricting over-supplied switch branches redirects coolant to compute trays.","textChars":77,"textLines":1,"bbox":[685,181,228,111]}
+{"kind":"textbox","id":"sh/c36dcfqp","slide":11,"text":"Equal flow is not the objective: the modeled compute heat load is 4.68× larger.","textPreview":"Equal flow is not the objective: the modeled compute heat load is 4.68× larger.","textChars":79,"textLines":1,"bbox":[685,327,232,106]}
+{"kind":"chart","id":"ch/8zilgzq1","slide":11,"name":"","chartType":"bar","bbox":[55,126,600,299]}
+{"kind":"image","id":"im/o32x0z2l","slide":11,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/0fixwz2p","slide":11,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/926dph","slide":11,"text":"Fresh solve on 15 September 2026. Chart values are the arithmetic mean per tray class, in inlet-reference L/min. This is a comparison at the same total 120 L/min. The class means hide within-class variation, so the next slide includes a 27-tray RMS metric.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/vjztb7","slide":12,"title":"Better Distribution Requires More Pumping","textShapes":5}
+{"kind":"textbox","id":"sh/2p0je18j","slide":12,"text":"Better Distribution Requires More Pumping","textPreview":"Better Distribution Requires More Pumping","textChars":41,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/nq907mp4","slide":12,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/03i1crqd","slide":12,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/e10jah87","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/f2903mps","slide":12,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/d0ri1c7m","slide":12,"text":"Maximum outlet falls 2.17 K; pumping rises 84.2 W (+31.6%).","textPreview":"Maximum outlet falls 2.17 K; pumping rises 84.2 W (+31.6%).","textChars":59,"textLines":1,"bbox":[43,416,870,31]}
+{"kind":"textbox","id":"sh/hwvalgvy","slide":12,"text":"Heat and total flow are unchanged, so the mixed return stays the same.","textPreview":"Heat and total flow are unchanged, so the mixed return stays the same.","textChars":70,"textLines":1,"bbox":[43,442,870,25]}
+{"kind":"table","id":"tb/p4v6p0ri","slide":12,"name":"","rows":7,"cols":3,"preview":"Metric | Reference | Balanced","bbox":[42,106,875,302]}
+{"kind":"image","id":"im/kr2x4bex","slide":12,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/8fmx8ve9","slide":12,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/vjztb7","slide":12,"text":"Recalculated from baseline.yaml and optimized_example.yaml. Balanced design retains 38 mm constant headers, compute added Kh = 0 and switch added Kh = 180528785.8784 Pa/(kg/s)^2. Pump efficiency is 0.60. Results are modeled, not hardware measurements or a proven global optimum. Legacy PG25 properties and fixed component resistance coefficients reproduce the earlier study.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/9rbprl","slide":13,"title":"Existing Code and Data to Reuse","textShapes":5}
+{"kind":"textbox","id":"sh/knqhwr6h","slide":13,"text":"Existing Code and Data to Reuse","textPreview":"Existing Code and Data to Reuse","textChars":31,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/lozy5wn2","slide":13,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/6p8zy1on","slide":13,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/8rqh0r6d","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/tsji9wny","slide":13,"text":"[5] [6] [7]  Sources and calculation details in speaker notes.","textPreview":"[5] [6] [7]  Sources and calculation details in speaker notes.","textChars":62,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/nuxgv25o","slide":13,"text":"Calculation workflow","textPreview":"Calculation workflow","textChars":20,"textLines":1,"bbox":[44,375,850,31]}
+{"kind":"textbox","id":"sh/72d0bqdk","slide":13,"text":"Solve flows and temperatures, update properties, and iterate.\nThen check constraints and compare designs.","textPreview":"Solve flows and temperatures, update properties, and iterate. | Then check constraints and compare designs.","textChars":105,"textLines":2,"bbox":[44,408,865,58]}
+{"kind":"table","id":"tb/rep0vuts","slide":13,"name":"","rows":4,"cols":3,"preview":"Resource | Role | Status","bbox":[42,113,875,239]}
+{"kind":"image","id":"im/2x4je5gf","slide":13,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/u9kjalgj","slide":13,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/9rbprl","slide":13,"text":"Existing code requirement: the repository already calls SciPy least_squares for hydraulic closure; it is not a solver written from scratch. CoolProp is a proposed independent property cross-check and is not the current runtime property engine. Its fluid-specific composition convention must be respected.\n\n[5] CoolProp. Incompressible Fluids documentation. https://coolprop.org/fluid_properties/Incompressibles.html\n[6] SciPy. scipy.optimize.least_squares documentation. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/ds8ogg","slide":14,"title":"Checks Needed Before Choosing Hardware","textShapes":10}
+{"kind":"textbox","id":"sh/rq1on21k","slide":14,"text":"Checks Needed Before Choosing Hardware","textPreview":"Checks Needed Before Choosing Hardware","textChars":38,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/qpsnuh0z","slide":14,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/1g36twjm","slide":14,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/zulorm1g","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/etcnyh0v","slide":14,"text":"[7]  Sources and calculation details in speaker notes.","textPreview":"[7]  Sources and calculation details in speaker notes.","textChars":54,"textLines":1,"bbox":[42,464,850,25]}
+{"kind":"textbox","id":"sh/hkjmhsj2","slide":14,"text":"Numerical checks passed","textPreview":"Numerical checks passed","textChars":23,"textLines":1,"bbox":[44,110,865,28]}
+{"kind":"textbox","id":"sh/gza5on2x","slide":14,"text":"Both example cases converge and satisfy mass, energy, and pressure closure.","textPreview":"Both example cases converge and satisfy mass, energy, and pressure closure.","textChars":75,"textLines":1,"bbox":[44,144,865,70]}
+{"kind":"textbox","id":"sh/i143qhcb","slide":14,"text":"Validate the inputs that drive the answer","textPreview":"Validate the inputs that drive the answer","textChars":41,"textLines":1,"bbox":[44,217,865,28]}
+{"kind":"textbox","id":"sh/j2d4zmdw","slide":14,"text":"Measure tray/QD pressure–flow curves and orifice discharge behavior. Obtain chip limits, thermal resistance, and facility/CDU performance maps.","textPreview":"Measure tray/QD pressure–flow curves and orifice discharge behavior. Obtain chip limits, thermal resistance, and facility/CDU performance...","textChars":143,"textLines":1,"bbox":[44,251,865,70]}
+{"kind":"textbox","id":"sh/43mlsruh","slide":14,"text":"Test fixed hardware across operating conditions","textPreview":"Test fixed hardware across operating conditions","textChars":47,"textLines":1,"bbox":[44,350,865,28]}
+{"kind":"textbox","id":"sh/54vm1cv2","slide":14,"text":"Sweep flow, workload split, coolant, and inlet temperature. Include bore tolerances, partial blockage, and reduced pump capability.","textPreview":"Sweep flow, workload split, coolant, and inlet temperature. Include bore tolerances, partial blockage, and reduced pump capability.","textChars":131,"textLines":1,"bbox":[44,384,865,70]}
+{"kind":"textbox","id":"sh/6p43uhcn","slide":14,"text":"The 1D model omits 3D tee momentum recovery. Verify header-shape benefits with CFD.","textPreview":"The 1D model omits 3D tee momentum recovery. Verify header-shape benefits with CFD.","textChars":83,"textLines":1,"bbox":[44,436,865,26]}
+{"kind":"image","id":"im/x4nq9kzm","slide":14,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/58nadkzi","slide":14,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/ds8ogg","slide":14,"text":"Recalculated numerical closure for both cases: mass relative error ≤ 2.18e-16; energy relative error ≤ 2.40e-15; pressure residual ≤ 4.37e-11 Pa. These show numerical closure only. Review properties, chip thermal resistance, QD curves, and actual pump/HX maps. Do not treat the 80 °C assumed target as an NVIDIA throttling threshold.\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization"}
+{"kind":"slide","id":"sl/yzla6j","slide":15,"title":"References and Calculation Record","textShapes":9}
+{"kind":"textbox","id":"sh/9g72poz2","slide":15,"text":"References and Calculation Record","textPreview":"References and Calculation Record","textChars":33,"textLines":1,"bbox":[40,17,885,54]}
+{"kind":"shape","id":"sh/8vylwjih","slide":15,"bbox":[0,76,940,3]}
+{"kind":"shape","id":"sh/zqpkje10","slide":15,"bbox":[0,76,395,3]}
+{"kind":"textbox","id":"sh/ls72l4j6","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[890,500,60,22]}
+{"kind":"textbox","id":"sh/0ry1szil","slide":15,"text":"[1] Sogunuru et al. (2020). Patterned flow distribution through manifolds in electronics cooling. IJMPERD 10(2), 975–986. Selected calculation baseline.","textPreview":"[1] Sogunuru et al. (2020). Patterned flow distribution through manifolds in electronics cooling. IJMPERD 10(2), 975–986. Selected calcul...","textChars":152,"textLines":1,"bbox":[45,108,870,52]}
+{"kind":"textbox","id":"sh/jm9kvyh4","slide":15,"text":"[2] Hassan et al. (2014). Modeling the Uniformity of Manifold with Various Configurations. Journal of Fluids. doi:10.1155/2014/325259.","textPreview":"[2] Hassan et al. (2014). Modeling the Uniformity of Manifold with Various Configurations. Journal of Fluids. doi:10.1155/2014/325259.","textChars":134,"textLines":1,"bbox":[45,163,870,52]}
+{"kind":"textbox","id":"sh/il032t0j","slide":15,"text":"[3] Anbumeenakshi & Thansekhar (2016). Header shape and inlet configuration in microchannels. Experimental Thermal and Fluid Science 75, 156–161. doi:10.1016/j.expthermflusci.2016.02.004.","textPreview":"[3] Anbumeenakshi & Thansekhar (2016). Header shape and inlet configuration in microchannels. Experimental Thermal and Fluid Science 75, ...","textChars":187,"textLines":1,"bbox":[45,218,870,72]}
+{"kind":"textbox","id":"sh/43mtsre1","slide":15,"text":"[4] NVIDIA DGX GB Rack Scale Systems User Guide: Hardware.","textPreview":"[4] NVIDIA DGX GB Rack Scale Systems User Guide: Hardware.","textChars":58,"textLines":1,"bbox":[45,293,870,31]}
+{"kind":"textbox","id":"sh/p4vulwfm","slide":15,"text":"[5] CoolProp: Incompressible Fluids database and documentation.","textPreview":"[5] CoolProp: Incompressible Fluids database and documentation.","textChars":63,"textLines":1,"bbox":[45,327,870,31]}
+{"kind":"textbox","id":"sh/214bqhwb","slide":15,"text":"[6] SciPy: scipy.optimize.least_squares documentation.","textPreview":"[6] SciPy: scipy.optimize.least_squares documentation.","textChars":54,"textLines":1,"bbox":[45,361,870,31]}
+{"kind":"textbox","id":"sh/32dcjmxg","slide":15,"text":"[7] NVL72-Manifold-Optimization repository. Matched reference and balanced runs recalculated on 15 September 2026. Full source links and details are in slide notes.","textPreview":"[7] NVL72-Manifold-Optimization repository. Matched reference and balanced runs recalculated on 15 September 2026. Full source links and ...","textChars":164,"textLines":1,"bbox":[45,395,870,55]}
+{"kind":"image","id":"im/7etgnet0","slide":15,"name":"","alt":"Penn shield watermark from supplied template","bbox":[21,11,350,393]}
+{"kind":"image","id":"im/zq9gjet4","slide":15,"name":"","alt":"Penn Engineering template logo","bbox":[48,493,190,36.5]}
+{"kind":"notes","id":"nt/yzla6j","slide":15,"text":"[1] Sogunuru A, Menon YK, Niranjanappa AC, Reddy KH. Numerical and Experimental Investigations on Patterned Flow Distribution through Manifolds in Electronics Cooling. IJMPERD. 2020;10(2):975–986. https://scispace.com/pdf/numerical-and-experimental-investigations-of-patterned-flow-6skn0d5dfr.pdf\n\n[2] Hassan JM, Mohamed TA, Mohammed WS, Alawee WH. Modeling the Uniformity of Manifold with Various Configurations. Journal of Fluids. 2014;325259. https://doi.org/10.1155/2014/325259\n\n[3] Anbumeenakshi C, Thansekhar MR. Experimental investigation of header shape and inlet configuration on flow maldistribution in microchannel. Experimental Thermal and Fluid Science. 2016;75:156–161. https://doi.org/10.1016/j.expthermflusci.2016.02.004\n\n[4] NVIDIA. DGX GB Rack Scale Systems User Guide, Hardware. https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html\n\n[5] CoolProp. Incompressible Fluids documentation. https://coolprop.org/fluid_properties/Incompressibles.html\n\n[6] SciPy. scipy.optimize.least_squares documentation. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html\n\n[7] Local project source and recalculated results, 15 September 2026. config/baseline.yaml, config/optimized_example.yaml, src/nvl72/{solver,hydraulics,thermal,orifices,cdu,facility,objectives}.py. Repository: https://github.com/jasonsimon999/NVL72-Manifold-Optimization\n\nAssignment coverage: three previous works (3), selected baseline (4), physical changes with circles/arrows (5), governing equations (8–10), existing code/database (13). No contribution hours are invented."}
