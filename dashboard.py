@@ -26,17 +26,23 @@ st.markdown('''<style>
 [data-testid="stMetricLabel"] {font-size:.85rem;}
 div[data-testid="stTabs"] button {font-weight:600;}
 </style>''',unsafe_allow_html=True)
+if st.session_state.get('show_dynamic_flow', False):
+    from nvl72.dynamic.ui import render as render_dynamic_flow
+    render_dynamic_flow(PROJECT_ROOT)
+    st.stop()
 st.title('Manifold lab')
 st.caption('NVL72 · Design, compare and understand your cooling network')
 st.caption('1. Adjust the design controls → 2. Check flow, temperature and pressure → 3. Save and compare promising designs.')
-if st.button('🔄 Open Dynamic Flow Control', type='primary', help='Switch to the active variable-flow comparison in this same Streamlit tab.'):
-    st.switch_page('pages/1_Dynamic_Flow_Control.py')
+if st.button('🔄 Open Dynamic Flow Control', help='Open the active variable-flow comparison in this same Streamlit tab.'):
+    st.session_state['show_dynamic_flow'] = True
+    st.rerun()
 st.caption('Compare the passive fixed-orifice manifold with active variable branch control. This button switches pages in the current tab.')
 with st.sidebar:
     st.markdown('## Navigation')
     st.caption('Current page: Fixed-orifice manifold')
     if st.button('🔄 Dynamic flow control', key='sidebar_dynamic_flow', use_container_width=True):
-        st.switch_page('pages/1_Dynamic_Flow_Control.py')
+        st.session_state['show_dynamic_flow'] = True
+        st.rerun()
     st.caption('Use the fixed page to design the passive manifold. Use the dynamic page to test transient workloads, active valves, failures, energy, and payback.')
     st.divider()
 REVISION=model_fingerprint(PROJECT_ROOT)

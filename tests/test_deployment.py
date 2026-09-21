@@ -47,3 +47,6 @@ def test_dynamic_button_switches_current_session():
     app=next(button for button in app.button if button.label=='🔄 Open Dynamic Flow Control').click().run()
     assert not app.exception, str(app.exception)
     assert any(item.value=='Dynamic flow control' for item in app.title)
+    next(button for button in app.button if button.label=='🎛️ Return to Fixed-Orifice Manifold').click().run()
+    assert not app.exception, str(app.exception)
+    assert any(item.value=='Manifold lab' for item in app.title)
