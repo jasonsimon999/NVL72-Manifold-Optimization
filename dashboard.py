@@ -29,11 +29,14 @@ div[data-testid="stTabs"] button {font-weight:600;}
 st.title('Manifold lab')
 st.caption('NVL72 · Design, compare and understand your cooling network')
 st.caption('1. Adjust the design controls → 2. Check flow, temperature and pressure → 3. Save and compare promising designs.')
-st.markdown('[🔄 Open Dynamic Flow Control →](./Dynamic_Flow_Control)  \nCompare the passive fixed-orifice manifold with active variable branch control.')
+if st.button('🔄 Open Dynamic Flow Control', type='primary', help='Switch to the active variable-flow comparison in this same Streamlit tab.'):
+    st.switch_page('pages/1_Dynamic_Flow_Control.py')
+st.caption('Compare the passive fixed-orifice manifold with active variable branch control. This button switches pages in the current tab.')
 with st.sidebar:
     st.markdown('## Navigation')
-    st.markdown('[🎛️ Fixed-orifice manifold](./)')
-    st.markdown('[🔄 Dynamic flow control](./Dynamic_Flow_Control)')
+    st.caption('Current page: Fixed-orifice manifold')
+    if st.button('🔄 Dynamic flow control', key='sidebar_dynamic_flow', use_container_width=True):
+        st.switch_page('pages/1_Dynamic_Flow_Control.py')
     st.caption('Use the fixed page to design the passive manifold. Use the dynamic page to test transient workloads, active valves, failures, energy, and payback.')
     st.divider()
 REVISION=model_fingerprint(PROJECT_ROOT)

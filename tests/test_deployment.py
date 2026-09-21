@@ -37,3 +37,13 @@ def test_requirements_installs_local_model():
     root=Path(__file__).resolve().parents[1]
     requirements=(root/'requirements.txt').read_text().splitlines()
     assert '.' in requirements
+
+def test_dynamic_button_switches_current_session():
+    from pathlib import Path
+    from streamlit.testing.v1 import AppTest
+    root=Path(__file__).resolve().parents[1]
+    app=AppTest.from_file(str(root/'dashboard.py'),default_timeout=60).run()
+    assert not app.exception, str(app.exception)
+    app=next(button for button in app.button if button.label=='🔄 Open Dynamic Flow Control').click().run()
+    assert not app.exception, str(app.exception)
+    assert any(item.value=='Dynamic flow control' for item in app.title)

@@ -32,7 +32,8 @@ def render(root):
     st.set_page_config(page_title='Dynamic flow control',page_icon='💧',layout='wide')
     st.markdown('<style>.block-container{max-width:1450px;padding-top:2rem;}[data-testid="stMetric"]{background:var(--secondary-background-color);padding:14px;border-radius:12px;}</style>',unsafe_allow_html=True)
     st.title('Dynamic flow control')
-    st.markdown('[🎛️ ← Return to Fixed-Orifice Manifold](./)')
+    if st.button('🎛️ Return to Fixed-Orifice Manifold', help='Switch back to the passive fixed-orifice page in this same tab.'):
+        st.switch_page('dashboard.py')
     st.markdown('**Does actively varying coolant flow to individual trays provide enough thermal and pumping-energy benefit to justify its added cost and complexity compared with an optimized passive fixed-orifice manifold?**')
     st.caption('1 · Choose a workload   →   2 · Compare the same hardware boundary   →   3 · Check thermal limits and net savings')
     st.info('Research model: temperatures represent an equivalent tray thermal node, not a validated hottest GPU junction. Workloads, thermal inertia, valve sizing and installed costs are assumptions. The fixed-orifice homepage is unchanged.')
