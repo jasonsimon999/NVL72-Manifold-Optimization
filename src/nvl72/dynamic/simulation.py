@@ -80,7 +80,7 @@ def simulate(prepared, s, controller='fixed'):
     measured=chip.copy();rng=np.random.default_rng(int(s['seed'])+9)
     next_sensor=0.;next_control=0.;last_command=opening.copy();actuations=0
     travel=0.;energy_error=0.;pressure_error=0.;mass_error=0.
-    arrays={k:[] for k in ('chip_C','outlet_C','mass','target_mass','opening','branch_dp_Pa',
+    arrays={k:[] for k in ('chip_C','outlet_C','mass','target_mass','opening','orifice_diameter_mm','branch_dp_Pa',
                            'supply_Pa','return_Pa','pump_W','valve_W','speed','head_Pa',
                            'rack_head_Pa','energy_residual_W','header_velocity_m_s','removed_W','storage_W')}
     failure_index=min(n-1,max(0,int(s['failure_tray'])))
@@ -119,7 +119,9 @@ def simulate(prepared, s, controller='fixed'):
         valves=float(np.sum(np.where(moving,s['valve_running_W'],s['valve_holding_W'])[controlled])+s['electronics_W']) if active else 0.
         pump=max(0,point['head'])*mass.sum()/float(ps.rho)/s['pump_efficiency']
         values=dict(chip_C=chip.copy(),outlet_C=outlet.copy(),mass=mass.copy(),target_mass=target,
-                    opening=np.where(controlled,opening,np.nan) if active else np.full(n,np.nan),branch_dp_Pa=point['branch_dp'],
+                    opening=np.where(controlled,opening,np.nan) if active else np.full(n,np.nan),
+                    orifice_diameter_mm=np.array([1000*float(b.get('orifice_diameter_m') or np.nan) if controlled[i] or not active else np.nan for i,b in enumerate(branches)]),
+                    branch_dp_Pa=point['branch_dp'],
                     supply_Pa=point['supply'],return_Pa=point['return_pressure'],pump_W=pump,valve_W=valves,
                     speed=speed,head_Pa=point['head'],rack_head_Pa=point['rack_head'],energy_residual_W=float(np.max(abs(res))),
                     header_velocity_m_s=point['header_velocity'],removed_W=removed.copy(),storage_W=power[j]-removed-res)
@@ -186,9 +188,28 @@ def summarize(r,s,p):
 
 def run_comparison(config, s=None):
     s=settings(**(s or {}));p=prepare(config,s)
-    fixed=simulate(p,s,'fixed');active=simulate(p,s,s['controller'])
+    fixed=simulate(p,s,'fixed');trial=simulate(p,s,s['controller'])
+    # Active control is a candidate, not an automatic winner.  Select it only
+    # when its constrained score improves on the same fixed-orifice boundary;
+    # otherwise expose the fixed result as the active design so the UI never
+    # recommends a worse configuration.
+    fixed_score=objective_score(fixed['summary'],s,fixed['summary'])
+    trial_score=objective_score(trial['summary'],s,fixed['summary'])
+    hard_pass=bool(trial['summary']['thermal_pass'] and trial['summary']['pressure_residual_Pa']<1.0
+                   and trial['summary']['node_mass_residual_kg_s']<1e-9
+                   and trial['summary']['energy_residual_W']<1e-5)
+    # The automatic winner rule is specific to the optimized diameter mode.
+    # The other controllers remain available as diagnostic experiments, where
+    # their raw behavior is intentionally shown even when it is worse.
+    choose_optimized=s['controller']=='optimized'
+    selected=trial if (not choose_optimized or (hard_pass and trial_score < fixed_score-s['optimization_fallback_tolerance'])) else deepcopy(fixed)
+    fallback=selected is not trial
+    selected['selected_from']='fixed' if fallback else 'optimized_active'
+    selected['controller']='fixed_fallback' if fallback else s['controller']
+    active=selected
     f,a=fixed['summary'],active['summary']
-    econ=economic_compare(f,a,s,min(len(p['ids']),int(s['controlled_branches'])),len(p['ids']))
+    selected_count=0 if fallback else min(len(p['ids']),int(s['controlled_branches']))
+    econ=economic_compare(f,a,s,selected_count,len(p['ids']))
     pump_saving=f['average_pump_W']-a['average_pump_W']
     net=f['average_aux_W']-a['average_aux_W']
     benefit=dict(pump_reduction_percent=100*pump_saving/f['average_pump_W'] if f['average_pump_W']>0 else None,
@@ -206,4 +227,29 @@ def run_comparison(config, s=None):
                             configured_flow_screen_pass=bool(result['summary']['peak_flow_LPM']<=config['constraints']['rack_flow_max_LPM']),
                             OCP_velocity_advisory_pass=bool(result['summary']['peak_header_velocity_m_s']<1.5),
                             note='HX capacity frozen at reference rating, not a dynamic heat exchanger calculation; inlet is externally maintained.')
-    return dict(settings=s,baseline_config=p['config'],baseline_reference=p['reference'],fixed=fixed,active=active,economics=econ,benefit=benefit,facility_screen=facility)
+    reason=('Fixed-orifice design retained: active diameter trial did not improve the constrained score '
+            'or failed a numerical/thermal screen.' if fallback else
+            ('Optimized active orifice diameters selected: constrained score improved while screens passed.'
+             if choose_optimized else 'Diagnostic controller shown without automatic winner selection.'))
+    return dict(settings=s,baseline_config=p['config'],baseline_reference=p['reference'],
+                fixed=fixed,active=active,active_candidate=trial,economics=econ,benefit=benefit,
+                optimization=dict(selected_from=selected['selected_from'],fallback_to_fixed=fallback,
+                                  fixed_score=float(fixed_score),active_trial_score=float(trial_score),
+                                  hard_pass=hard_pass,reason=reason),facility_screen=facility)
+
+def objective_score(summary,s,reference):
+    """Dimensionless engineering score used only to choose active vs fixed.
+
+    Thermal and flow tracking are normalized by entered limits; pumping,
+    pressure and actuator activity are normalized by the fixed baseline.  This
+    is a transparent screening objective, not a claim of global optimality.
+    """
+    scale_p=max(float(reference['average_pump_W']),1.)
+    scale_h=max(float(reference['peak_head_kPa']),1.)
+    thermal=max(0.,float(summary['peak_chip_C']-s['chip_limit_C']))/max(s['chip_limit_C'],1.)
+    return (s['optimization_temperature_weight']*thermal
+            +s['optimization_flow_weight']*float(summary['rms_flow_error'])
+            +s['optimization_worst_flow_weight']*float(summary['max_abs_flow_error'])
+            +s['optimization_pump_weight']*float(summary['average_aux_W'])/scale_p
+            +s['optimization_pressure_weight']*float(summary['peak_head_kPa'])/scale_h
+            +s['optimization_actuation_weight']*float(summary['valve_full_cycles'])/max(1.,len(reference.get('per_tray',[]))))

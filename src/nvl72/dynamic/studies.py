@@ -26,7 +26,8 @@ def compact(r, label):
                 fixed_flow_LPM=f['average_flow_LPM'],active_flow_LPM=a['average_flow_LPM'],
                 annual_savings=e['annual_savings'],payback_years=e['payback_years'],
                 break_even_price=e['break_even_price'],affordable_capex=e['affordable_incremental_capex'],
-                active_actuations=a['valve_actuations'],pressure_residual_Pa=a['pressure_residual_Pa'])
+                active_actuations=a['valve_actuations'],pressure_residual_Pa=a['pressure_residual_Pa'],
+                active_selected_from=r.get('optimization',{}).get('selected_from'))
 
 def scenario_study(c,s,progress=None):
     rows=[]
@@ -71,7 +72,7 @@ def sensitivity_study(c,s,keys=None,progress=None):
 def strategy_study(c,s):
     rows=[]
     for pump in ('constant_speed','constant_dp','demand'):
-        for controller in ('reactive','feedforward','combined'):
+        for controller in ('optimized','reactive','feedforward','combined'):
             rows.append(compact(run_comparison(c,dict(s,pump_mode=pump,controller=controller)),pump+' / '+controller))
     return rows
 

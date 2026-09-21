@@ -61,8 +61,11 @@ def system_snapshot(result,index):
         ax.add_patch(Rectangle((3,y-.37),4,.74,facecolor=color,zorder=3))
         ax.text(5,y,f"{id}  {r['flow_LPM'][index,i]:.1f} L/min" if connected else f'{id}  DISCONNECTED',ha='center',va='center',fontsize=8,zorder=4)
         position=r['opening'][index,i];position=.5 if not np.isfinite(position) else position
-        ax.add_patch(Circle((2,y),.23,facecolor=plt.cm.Greens(.2+.8*position) if connected else '#999',edgecolor='#456',zorder=4))
-    ax.set_title(f"27 parallel branches · t = {r['time_s'][index]:g} s",fontsize=12)
+        fixed_mode=r.get('controller') in ('fixed','fixed_fallback')
+        face='#9aa4ad' if fixed_mode and connected else (plt.cm.Greens(.2+.8*position) if connected else '#999')
+        ax.add_patch(Circle((2,y),.23,facecolor=face,edgecolor='#456',zorder=4))
+    mode_label='fixed plates' if r.get('controller') in ('fixed','fixed_fallback') else 'variable orifices'
+    ax.set_title(f"27 parallel branches · {mode_label} · t = {r['time_s'][index]:g} s",fontsize=12)
     fig.tight_layout();return fig
 
 def tornado(rows):

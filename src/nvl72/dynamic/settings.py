@@ -11,6 +11,9 @@ DEFAULTS = {
     'compute_R_K_W': .004, 'switch_R_K_W': .012,
     'coolant_C_J_K': 1200., 'chip_limit_C': 80., 'outlet_limit_C': 65.,
     'target_rise_K': 15., 'minimum_flow_fraction': .15,
+    # Optimized mode uses the measured flow target to choose an effective
+    # variable orifice area.  The comparison layer can still fall back to the
+    # fixed plate when that trial is not an improvement.
     'controller': 'combined', 'control_s': 2., 'sensor_s': 2.,
     'sensor_noise_K': .1, 'sensor_bias_K': 0., 'temperature_target_C': 72.,
     'kp_per_K': .025, 'ki_per_K_s': .0005, 'flow_gain': .3,
@@ -27,6 +30,13 @@ DEFAULTS = {
     'failure': 'none', 'failure_tray': 0, 'sensor_failure_bias_K': 8.,
     'electricity_per_kWh': .12, 'operating_hours': 8760.,
     'cost_case': 'nominal', 'payback_horizon_years': 5.,
+    'optimization_temperature_weight': 1.0,
+    'optimization_flow_weight': .5,
+    'optimization_worst_flow_weight': .25,
+    'optimization_pump_weight': .5,
+    'optimization_pressure_weight': .25,
+    'optimization_actuation_weight': .1,
+    'optimization_fallback_tolerance': 1e-6,
 }
 
 COSTS = {
@@ -43,7 +53,7 @@ COSTS = {
 
 SCENARIOS = ['steady', 'rack_step', 'localized', 'heterogeneous', 'worst_case',
              'bursts', 'remove_compute', 'remove_switch', 'remove_several', 'reinstall']
-CONTROLLERS = ['fixed', 'reactive', 'feedforward', 'combined', 'locked']
+CONTROLLERS = ['fixed', 'reactive', 'feedforward', 'combined', 'optimized', 'locked']
 FAILURES = ['none', 'stuck_closed', 'stuck_open', 'stuck_half', 'sensor_high',
             'sensor_low', 'communications', 'pump_lag']
 
@@ -80,6 +90,9 @@ def validate(s):
     if s['pump_mode'] not in ('constant_speed','constant_dp','demand'): raise ValueError('Unknown pump mode')
     for k in ('coldplate_scale','qd_scale','compute_power_scale','switch_power_scale','ramp_per_s',
               'sensor_noise_K','valve_body_K','valve_running_W','valve_holding_W','electronics_W',
-              'electricity_per_kWh','operating_hours','pump_max_speed','valve_deadband'):
+              'electricity_per_kWh','operating_hours','pump_max_speed','valve_deadband',
+              'optimization_temperature_weight','optimization_flow_weight','optimization_worst_flow_weight',
+              'optimization_pump_weight','optimization_pressure_weight','optimization_actuation_weight',
+              'optimization_fallback_tolerance'):
         if s[k] < 0: raise ValueError(f'{k} cannot be negative')
     if s['low_load'] > s['high_load']: raise ValueError('Low load cannot exceed high load')

@@ -84,7 +84,7 @@ python studies/dynamic_flow_study.py --full
 
 The last command saves reproducible JSON and CSV files under `results/dynamic/`. It does not change the website or passive design. `docs/DYNAMIC_RESULTS.md` contains the checked default results and interpretation.
 
-Required validation covers: locked-active equals fixed; original full-load hydraulic reproduction; identical branches with negligible headers; zero heat relaxation; disconnected branch zero flow; pump off zero flow and heat storage; finite valve stroke; near-closed leakage; zero-leakage shutoff with continuing heat; open-valve coupled pressure balance; every-step energy/mass/pressure conservation; seed reproducibility; sensor/valve/communications/pump failures; timestep refinement; unchanged inputs; and strict JSON export. Original model regression tests remain included.
+Required validation covers: locked-active equals fixed; original full-load hydraulic reproduction; identical branches with negligible headers; zero heat relaxation; disconnected branch zero flow; pump off zero flow and heat storage; finite valve stroke; near-closed leakage; zero-leakage shutoff with continuing heat; open-valve coupled pressure balance; every-step energy/mass/pressure conservation; seed reproducibility; sensor/valve/communications/pump failures; timestep refinement; unchanged inputs; optimized-mode fallback/selection; and strict JSON export. Original model regression tests remain included.
 
 ## Files
 
@@ -97,3 +97,9 @@ Required validation covers: locked-active equals fixed; original full-load hydra
 - This document, `DYNAMIC_RESULTS.md`, `agent.md`, and `results/dynamic/`: implementation record and calculated evidence.
 
 Most valuable missing measurements: per-tray Δp–flow curves including real QDs; valve Cv versus stroke and actuator/leakage/failsafe data; device junction-to-fluid resistance versus flow; tray thermal capacitance/transport delay; measured liquid fraction; real AI workload traces; pump efficiency/head maps; facility/CDU transient capacity; qualified device temperature limits; and installed/maintenance quotes.
+
+## Optimized variable-orifice mode
+
+The sidebar's **Optimized variable orifice diameter** controller maps each branch's power-derived target flow to an effective area. Since an incompressible restriction is approximately quadratic in flow, the command uses a `sqrt(m_target/m_actual)` area correction, bounded by the configured minimum area, maximum bore fraction, stroke rate and actuator time constant. A bounded temperature trim protects the entered thermal target. The hydraulic result exports the effective diameter in `orifice_diameter_mm` for every branch and timestep.
+
+The active run is treated as a candidate. The page computes a dimensionless score from thermal overshoot, RMS and worst-case flow error, auxiliary power, peak pressure and actuator travel. It accepts active control only when the candidate passes thermal and numerical closure screens and scores lower than the fixed design. Otherwise it falls back to an exact copy of the fixed result, reports the reason, and uses fixed hardware in the economics. The rejected trial remains in the JSON export as `active_candidate` for auditability. Weights and the fallback tolerance are editable advanced assumptions; this is a transparent screening rule rather than a global optimizer or a substitute for measured valve Cv data.
