@@ -1,0 +1,28 @@
+[
+  {
+    "controller": "fixed",
+    "thermal_load_multiplier": 1.0751953125,
+    "thermal_only_liquid_kW": 124.2495703125,
+    "additional_liquid_kW": 8.6895703125,
+    "rating_capped_liquid_kW": 121.0,
+    "final_flow_LPM": 118.27088934804816,
+    "final_pump_W": 338.96021902269007,
+    "settled": true,
+    "drift_K_s": 7.458451410258249e-06,
+    "upper_search_bound_reached": false,
+    "note": "Thermal-only finite-horizon screen. Rating cap is not HX/site qualification; no IT performance prediction."
+  },
+  {
+    "controller": "combined",
+    "thermal_load_multiplier": 1.0751953125,
+    "thermal_only_liquid_kW": 124.2495703125,
+    "additional_liquid_kW": 8.6895703125,
+    "rating_capped_liquid_kW": 121.0,
+    "final_flow_LPM": 118.97289922935302,
+    "final_pump_W": 354.6212543721105,
+    "settled": true,
+    "drift_K_s": 1.6737864245085023e-06,
+    "upper_search_bound_reached": false,
+    "note": "Thermal-only finite-horizon screen. Rating cap is not HX/site qualification; no IT performance prediction."
+  }
+]

@@ -22,7 +22,8 @@ class HydraulicResult:
     nfev: int
     converged: bool
 
-def solve_network(c, branches, total_mass, supply_props, branch_props, return_props, initial=None, evaluate_mass=None):
+def network_evaluator(c, branches, supply_props, branch_props, return_props):
+    """Shared component/path evaluator for steady and transient network solvers."""
     z,dz,ds,dr = geometry(c); n = len(z)
     b = {key: np.array([item[key] for item in branches]) for key in ('diameter_m','tube_length_m','tube_multiplier','coldplate_K','qdc_K','restriction_K')}
     b['qdc_K']=np.array([mass_coefficient(item,float(branch_props.rho[i])) for i,item in enumerate(branches)])
@@ -33,7 +34,6 @@ def solve_network(c, branches, total_mass, supply_props, branch_props, return_pr
     hr[1:] += minor['header']['expansion']*(np.abs(np.diff(dr))>1e-12)
     g = c['rack']['gravity_m_s2'] if c['rack']['gravity_enabled'] else 0.0
     gs = supply_props.rho*g*dz; gr = return_props.rho*g*dz
-    scale_m = total_mass/n
     orifice_coeff = np.zeros(n)
     auto=c.get('balancing_mode','resistance')=='auto_equivalent'
     for i,item in enumerate(branches):
@@ -67,6 +67,12 @@ def solve_network(c, branches, total_mass, supply_props, branch_props, return_pr
         rc = np.cumsum(rl['friction']+rl['minor']-gr)
         return sc,rc,losses,sl,rl
 
+    return evaluate, np.cumsum(gs-gr)
+
+def solve_network(c, branches, total_mass, supply_props, branch_props, return_props, initial=None, evaluate_mass=None):
+    n = len(branches)
+    scale_m = total_mass/n
+    evaluate, gravity_path = network_evaluator(c, branches, supply_props, branch_props, return_props)
     if evaluate_mass is not None:
         sc,rc,losses,sl,rl = evaluate(np.asarray(evaluate_mass))
         return sc+rc+sum(losses.values())
@@ -88,4 +94,4 @@ def solve_network(c, branches, total_mass, supply_props, branch_props, return_pr
     merr = float(abs(m.sum()-total_mass)/total_mass)
     good = sol.success and pres<c['solver']['pressure_tolerance_Pa'] and merr<c['solver']['mass_relative_tolerance'] and np.all(m>0)
     if not good: raise RuntimeError(f'Network did not converge: {sol.message}; closure={pres:g} Pa, mass={merr:g}')
-    return HydraulicResult(m,head,head-sc,rc,losses,sl,rl,np.cumsum(gs-gr),pres,merr,sol.nfev,True)
+    return HydraulicResult(m,head,head-sc,rc,losses,sl,rl,gravity_path,pres,merr,sol.nfev,True)

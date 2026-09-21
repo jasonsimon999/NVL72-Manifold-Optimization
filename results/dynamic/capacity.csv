@@ -1,0 +1,3 @@
+controller,thermal_load_multiplier,thermal_only_liquid_kW,additional_liquid_kW,rating_capped_liquid_kW,final_flow_LPM,final_pump_W,settled,drift_K_s,upper_search_bound_reached,note
+fixed,1.0751953125,124.2495703125,8.6895703125,121.0,118.27088934804816,338.96021902269007,True,7.458451410258249e-06,False,Thermal-only finite-horizon screen. Rating cap is not HX/site qualification; no IT performance prediction.
+combined,1.0751953125,124.2495703125,8.6895703125,121.0,118.97289922935302,354.6212543721105,True,1.6737864245085023e-06,False,Thermal-only finite-horizon screen. Rating cap is not HX/site qualification; no IT performance prediction.

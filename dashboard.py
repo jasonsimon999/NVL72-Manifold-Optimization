@@ -51,6 +51,9 @@ except (ValueError,RuntimeError,TypeError,KeyError,AttributeError,yaml.YAMLError
     st.info('Check the latest change. Bores must be smaller than branch IDs; temperatures must stay within the coolant table. No previous result is being shown as current.')
     st.stop()
 
+# Read-only handoff to the separate transient page; never changes this design.
+st.session_state['dynamic_baseline_config']=result.get('fixed_orifice_config') or result['config']
+
 pins=st.session_state.setdefault('design_pins',{})
 reference_name=st.selectbox('Compare current design against',['Original reference']+list(pins),help='Sets the comparison for metric differences and reference curves. It does not replace your current inputs.')
 baseline=original if reference_name=='Original reference' else compatible_result(pins[reference_name])

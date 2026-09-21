@@ -7,7 +7,7 @@ from .config import merge,validate
 
 def model_fingerprint(root):
     digest=hashlib.sha256()
-    paths=sorted((Path(root)/'src/nvl72').glob('*.py'))+sorted((Path(root)/'data').glob('*'))
+    paths=sorted((Path(root)/'src/nvl72').rglob('*.py'))+sorted((Path(root)/'data').glob('*'))
     for path in paths:
         if path.is_file():digest.update(path.name.encode());digest.update(path.read_bytes())
     return digest.hexdigest()

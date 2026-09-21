@@ -167,3 +167,9 @@ The paired Monte Carlo uses common random draws across baseline/candidates. It c
 Run `pytest` before optimization. Tests cover analytical laminar pipe/parallel branches, turbulent friction cross-check, enthalpy inversion/mixing, mass/energy/pressure closure, monotonic network response, zero-flow/signed losses, property bounds, geometry profiles, source coverage, pump intersection/affinity, no-gravity/hydrostatic cancellation, removed/near-zero-load trays, in-row aggregate boundaries and visible constraint failures. Dashboard smoke tests use Streamlit's AppTest.
 
 This is steady state, one dimensional and adiabatic outside trays. Recoverable axial kinetic-head redistribution and 3D tee momentum are omitted; configured junction losses are a reduced model. Constant mass-flow cold-plate K does not capture viscosity dependence of proprietary channels; resistance uncertainty is essential. Cavitation, absolute-pressure qualification, transients, detailed multi-chip plumbing and manufacturability costs are outside scope. Qualified hardware decisions require measured component curves and vendor pump/HX data.
+
+## Dynamic flow control — separate analysis page
+
+Start the app normally and choose **Dynamic Flow Control** in the sidebar. It compares unchanged passive bores with finite-speed active valves under shared workloads and pump controls. It includes transient thermal storage, maintenance/fault scenarios, energy/cost comparisons, sensitivity sweeps and source provenance. The existing fixed-orifice page remains available.
+
+See [model and usage guide](docs/DYNAMIC_FLOW_CONTROL.md) and [calculated default results](docs/DYNAMIC_RESULTS.md). Reproduce the studies with `python studies/dynamic_flow_study.py --full`. These are engineering screening results, not validated NVL72 device-temperature predictions.
