@@ -8,15 +8,7 @@ def command(mode, opening, temperature, mass, target, integral, s, interval):
     error = temperature-s['temperature_target_C']  # Hotter -> open, never the opposite.
     trial = np.clip(integral+error*interval, -500., 500.)
     flow_error = (target-mass)/np.maximum(target,1e-8)
-    if mode == 'optimized':
-        # Flow demand maps directly to an area (and therefore an effective
-        # orifice diameter).  For a quadratic restriction, d ∝ sqrt(m_dot).
-        # The small temperature trim protects the thermal target without
-        # turning the controller into an unconstrained pressure chase.
-        area_ratio=np.sqrt(np.clip(target/np.maximum(mass,1e-8),0.,4.))
-        trim=np.clip(s['kp_per_K']*error+s['ki_per_K_s']*trial,0.,.25)
-        raw=opening*area_ratio + .2*flow_error + trim
-    elif mode == 'reactive': raw = .5+s['kp_per_K']*error+s['ki_per_K_s']*trial
+    if mode == 'reactive': raw = .5+s['kp_per_K']*error+s['ki_per_K_s']*trial
     elif mode == 'feedforward': raw = opening+s['flow_gain']*flow_error
     else:
         # Temperature trims the flow-tracking error, rather than integrating

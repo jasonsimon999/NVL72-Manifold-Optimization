@@ -20,10 +20,11 @@ def time_series(result, tray=0):
         for r,color,style,label in [(f,'#667085','--','Fixed'),(a,'#008c95','-','Active')]:
             y=fn(r)
             if np.isfinite(y).any():ax.plot(t,y,color=color,linestyle=style,label=label,lw=1.7)
-        if title=='Selected tray flow':ax.plot(t,a['target_mass'][:,tray]/np.maximum(a['mass'][:,tray],1e-15)*a['flow_LPM'][:,tray],':',color='#d77b18',label='Thermal target')
+        if title=='Selected tray flow':ax.plot(t,a['target_flow_LPM'][:,tray],':',color='#d77b18',label='Thermal target')
         if title=='Representative solid temperature':ax.axhline(result['settings']['chip_limit_C'],color='#c34835',ls=':',label='Screening ceiling')
         if title=='Selected coolant outlet':ax.axhline(result['settings']['outlet_limit_C'],color='#c34835',ls=':')
-        ax.set(title=title,xlabel='Time · s',ylabel=unit);ax.grid(alpha=.15);ax.legend(fontsize=8)
+        ax.set(title=title,xlabel='Time · s',ylabel=unit);ax.grid(alpha=.15)
+        if ax.get_legend_handles_labels()[0]:ax.legend(fontsize=8)
         ax.spines[['top','right']].set_visible(False)
     return fig
 
@@ -79,3 +80,25 @@ def tornado(rows):
         ax.set_yticks(range(len(groups)),groups.index)
     ax.axvline(0,color='#777',ls='--');ax.set_xlabel('Net auxiliary power saved · W (negative = active uses more)')
     ax.spines[['top','right']].set_visible(False);fig.tight_layout();return fig
+
+
+def bore_history(result):
+    trial=result.get('active_candidate',result['active']); fixed=result['fixed']
+    base=fixed['orifice_diameter_mm']
+    values=trial['orifice_diameter_mm']; disconnected=trial['connected']<=0
+    return paired_maps(trial,[np.where(disconnected,np.nan,values),np.where(disconnected,np.nan,values-base)],['Adaptive bore · mm','Adaptive minus fixed bore · mm'],['viridis','RdBu_r'])
+
+def service_response(result):
+    trial=result.get('active_candidate',result['active']); fixed=result['fixed']
+    return paired_maps(trial,[trial['flow_LPM'],trial['flow_LPM']-fixed['flow_LPM']],['Adaptive flow · L/min','Adaptive minus fixed flow · L/min'],['viridis','RdBu_r'])
+
+def paired_maps(run,arrays,titles,maps):
+    fig,axes=plt.subplots(1,2,figsize=(13,8),constrained_layout=True)
+    for ax,data,title,cmap in zip(axes,arrays,titles,maps):
+        cmap=plt.get_cmap(cmap).with_extremes(bad='#d0d5dd')
+        finite=data[np.isfinite(data)]; bound=max(np.max(abs(finite)),1e-6) if finite.size else 1.
+        options=dict(vmin=-bound,vmax=bound) if 'minus' in title else {}
+        im=ax.imshow(data.T,aspect='auto',interpolation='nearest',extent=[0,run['time_s'][-1],len(run['ids'])-.5,-.5],cmap=cmap,**options)
+        ax.set_yticks(range(len(run['ids'])),run['ids'],fontsize=8)
+        ax.set(title=title,xlabel='Time · s');fig.colorbar(im,ax=ax,shrink=.7)
+    return fig

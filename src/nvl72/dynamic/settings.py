@@ -2,6 +2,7 @@
 from copy import deepcopy
 
 DEFAULTS = {
+    'service_events': [],
     'duration_s': 300., 'dt_s': 2., 'seed': 72, 'scenario': 'heterogeneous',
     'low_load': .3, 'high_load': 1., 'spike_s': 40., 'duty': .4,
     'correlation': .4, 'ramp_per_s': .2, 'localized_count': 4,
@@ -96,3 +97,14 @@ def validate(s):
               'optimization_fallback_tolerance'):
         if s[k] < 0: raise ValueError(f'{k} cannot be negative')
     if s['low_load'] > s['high_load']: raise ValueError('Low load cannot exceed high load')
+
+    for event in s.get('service_events',[]):
+        start=event['disconnect_s'];end=event.get('reconnect_s');ramp=event['ramp_s'];tray=event['tray']
+        if not all(math.isfinite(float(v)) for v in (start,ramp,tray)) or not 0<=start<s['duration_s'] or ramp<=0 or int(tray)!=tray:
+            raise ValueError('Service requires an integer tray, start within the run, and positive finite ramp')
+        if end is not None and (not math.isfinite(float(end)) or end<=start or end>s['duration_s']):
+            raise ValueError('Reconnect time must follow disconnection and be within the run')
+    if abs(s['duration_s']/s['dt_s']-round(s['duration_s']/s['dt_s']))>1e-8:
+        raise ValueError('Duration must be a whole number of timesteps')
+    if s['scenario']=='reinstall' and s['reconnect_s']<=s['event_s']:
+        raise ValueError('Reinstallation must follow removal')

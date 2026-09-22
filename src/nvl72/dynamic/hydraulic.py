@@ -73,3 +73,23 @@ def initial_positions(branches,rho,s):
         fraction=1. if bore is None else (bore/(pipe*s['valve_max_bore_fraction']))**2
         positions.append(np.clip((fraction-s['valve_min_area_fraction'])/(1-s['valve_min_area_fraction']),0,1))
     return np.asarray(positions)
+
+
+def size_positions(branches, opening, mass, target, rho, s):
+    """Invert the same permanent-loss law used by the network solver.
+
+    Local pressure is held for this sizing step, then the entire coupled
+    network is re-solved. This is feedback sizing, not a global optimizer.
+    """
+    result=[]
+    for i,b in enumerate(branches):
+        D=b['diameter_m']; maximum=D*s['valve_max_bore_fraction']
+        fraction=s['valve_min_area_fraction']+(1-s['valve_min_area_fraction'])*opening[i]
+        current=max(maximum*np.sqrt(fraction),1e-9)
+        if target[i]<=0:result.append(opening[i]);continue
+        if mass[i]<=1e-10:result.append(1.);continue
+        k=coefficient(current,D,rho[i],s['valve_Cd'])*(mass[i]/target[i])**2
+        bore=bore_from_coefficient(k,D,rho[i],s['valve_Cd']) or D
+        u=((bore/maximum)**2-s['valve_min_area_fraction'])/(1-s['valve_min_area_fraction'])
+        result.append(np.clip(u,0,1))
+    return np.asarray(result)

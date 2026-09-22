@@ -91,8 +91,12 @@ def simulate(prepared, s, controller='fixed'):
             measured=chip+s['sensor_bias_K']+rng.normal(0,s['sensor_noise_K'],n)
             if failure in ('sensor_high','sensor_low'):measured[failure_index]+=s['sensor_failure_bias_K']*(1 if failure=='sensor_high' else -1)
             next_sensor=time+s['sensor_s']
-        if active and time+1e-8>=next_control:
-            target_open,integral=command(controller,opening,measured,mass,target,integral,s,s['control_s'])
+        if active and controller!='hold' and time+1e-8>=next_control:
+            if controller=='optimized':
+                from .hydraulic import size_positions
+                target_open=size_positions(p['branches'],opening,mass,target,pb.rho,s)
+            else:
+                target_open,integral=command(controller,opening,measured,mass,target,integral,s,s['control_s'])
             next_control=time+s['control_s']
         if failure=='communications':target_open[:]=s['fail_position']
         previous=opening.copy()
@@ -120,7 +124,7 @@ def simulate(prepared, s, controller='fixed'):
         pump=max(0,point['head'])*mass.sum()/float(ps.rho)/s['pump_efficiency']
         values=dict(chip_C=chip.copy(),outlet_C=outlet.copy(),mass=mass.copy(),target_mass=target,
                     opening=np.where(controlled,opening,np.nan) if active else np.full(n,np.nan),
-                    orifice_diameter_mm=np.array([1000*float(b.get('orifice_diameter_m') or np.nan) if controlled[i] or not active else np.nan for i,b in enumerate(branches)]),
+                    orifice_diameter_mm=np.array([1000*float(b.get('orifice_diameter_m') or b['diameter_m'])  for i,b in enumerate(branches)]),
                     branch_dp_Pa=point['branch_dp'],
                     supply_Pa=point['supply'],return_Pa=point['return_pressure'],pump_W=pump,valve_W=valves,
                     speed=speed,head_Pa=point['head'],rack_head_Pa=point['rack_head'],energy_residual_W=float(np.max(abs(res))),
@@ -132,6 +136,7 @@ def simulate(prepared, s, controller='fixed'):
     result.update(time_s=t,electrical_W=electrical,liquid_W=power,connected=connection,
                   controller=controller,ids=p['ids'],kinds=p['kinds'])
     result['flow_LPM']=result['mass']/float(ps.rho)*60000
+    result['target_flow_LPM']=result['target_mass']/float(ps.rho)*60000
     result['summary']=summarize(result,s,p)
     result['summary'].update(valve_actuations=actuations,valve_full_cycles=travel/2,
                              valve_travel=travel,pressure_residual_Pa=pressure_error,
@@ -150,7 +155,7 @@ def summarize(r,s,p):
     target=r['target_mass'];mask=(target>0)&(r['connected']>0)
     error=np.divide(r['mass']-target,target,out=np.zeros_like(target),where=mask)
     relevant=np.where(mask,error,np.nan)
-    worst=int(np.nanargmax(np.nanmax(abs(relevant),axis=0)))
+    worst=int(np.argmax(np.max(np.where(mask,abs(error),-1.),axis=0)))
     compute=np.array(r['kinds'])=='compute';chip=r['chip_C'];out=r['outlet_C']
     operating=r['connected']>0
     live_chip=np.where(operating,chip,np.nan);live_out=np.where(operating,out,np.nan)
@@ -176,10 +181,10 @@ def summarize(r,s,p):
                 average_pump_W=avg(r['pump_W']),average_aux_W=avg(r['pump_W']+r['valve_W']),
                 pump_energy_kWh=pump_energy,valve_energy_kWh=valve_energy,
                 auxiliary_energy_kWh=pump_energy+valve_energy,
-                rms_flow_error=float(np.sqrt(np.nanmean(relevant**2))),
-                max_abs_flow_error=float(np.nanmax(abs(relevant))),flow_error_std=float(np.nanstd(relevant)),
+                rms_flow_error=float(np.sqrt(np.mean(relevant[mask]**2)) if mask.any() else 0.),
+                max_abs_flow_error=float(np.max(abs(relevant[mask]))) if mask.any() else 0.,flow_error_std=float(np.std(relevant[mask])) if mask.any() else 0.,
                 worst_tray=p['ids'][worst],average_IT_W=avg(r['electrical_W'].sum(axis=1)),
-                maximum_flow_overshoot_percent=float(np.nanmax(relevant)*100),
+                maximum_flow_overshoot_percent=float(np.max(relevant[mask])*100) if mask.any() else 0.,
                 temperature_overshoot_K=float(max(0,np.nanmax(live_chip)-s['temperature_target_C'])),
                 recovery_s=recovery,
                 valve_saturation_s=float(np.sum(np.any((r['opening'][1:]<.01)|(r['opening'][1:]>.99),axis=1))*dt),
@@ -189,23 +194,31 @@ def summarize(r,s,p):
 def run_comparison(config, s=None):
     s=settings(**(s or {}));p=prepare(config,s)
     fixed=simulate(p,s,'fixed');trial=simulate(p,s,s['controller'])
+    adaptive_trial=trial
+    held=simulate(p,s,'hold') if s['controller']=='optimized' else None
+    if held is not None and s['failure']=='none':
+        candidates=[x for x in (trial,held) if x['summary']['thermal_pass']]
+        protected=('peak_chip_C','peak_outlet_C','average_aux_W','peak_head_kPa','rms_flow_error','max_abs_flow_error')
+        eligible=[x for x in candidates if all(x['summary'][k]<=fixed['summary'][k]+1e-7 for k in protected)]
+        if eligible:trial=min(eligible,key=lambda x:objective_score(x['summary'],s,fixed['summary']))
     # Active control is a candidate, not an automatic winner.  Select it only
     # when its constrained score improves on the same fixed-orifice boundary;
     # otherwise expose the fixed result as the active design so the UI never
     # recommends a worse configuration.
     fixed_score=objective_score(fixed['summary'],s,fixed['summary'])
     trial_score=objective_score(trial['summary'],s,fixed['summary'])
-    hard_pass=bool(trial['summary']['thermal_pass'] and trial['summary']['pressure_residual_Pa']<1.0
+    nonregression=all(trial['summary'][key]<=fixed['summary'][key]+1e-7 for key in ('peak_chip_C','peak_outlet_C','average_aux_W','peak_head_kPa','rms_flow_error','max_abs_flow_error'))
+    hard_pass=bool(nonregression and trial['summary']['thermal_pass'] and trial['summary']['pressure_residual_Pa']<1.0
                    and trial['summary']['node_mass_residual_kg_s']<1e-9
                    and trial['summary']['energy_residual_W']<1e-5)
     # The automatic winner rule is specific to the optimized diameter mode.
     # The other controllers remain available as diagnostic experiments, where
     # their raw behavior is intentionally shown even when it is worse.
-    choose_optimized=s['controller']=='optimized'
+    choose_optimized=s['controller']=='optimized' and s['failure']=='none'
     selected=trial if (not choose_optimized or (hard_pass and trial_score < fixed_score-s['optimization_fallback_tolerance'])) else deepcopy(fixed)
     fallback=selected is not trial
-    selected['selected_from']='fixed' if fallback else 'optimized_active'
-    selected['controller']='fixed_fallback' if fallback else s['controller']
+    selected['selected_from']='fixed' if fallback else trial['controller']
+    selected['controller']='fixed_fallback' if fallback else trial['controller']
     active=selected
     f,a=fixed['summary'],active['summary']
     selected_count=0 if fallback else min(len(p['ids']),int(s['controlled_branches']))
@@ -228,13 +241,15 @@ def run_comparison(config, s=None):
                             OCP_velocity_advisory_pass=bool(result['summary']['peak_header_velocity_m_s']<1.5),
                             note='HX capacity frozen at reference rating, not a dynamic heat exchanger calculation; inlet is externally maintained.')
     reason=('Fixed-orifice design retained: active diameter trial did not improve the constrained score '
-            'or failed a numerical/thermal screen.' if fallback else
-            ('Optimized active orifice diameters selected: constrained score improved while screens passed.'
+            'or worsened a protected performance metric or failed a numerical/thermal screen.' if fallback else
+            (f"Active candidate ({trial['controller']}) selected: score improved and protected metrics did not worsen."
              if choose_optimized else 'Diagnostic controller shown without automatic winner selection.'))
     return dict(settings=s,baseline_config=p['config'],baseline_reference=p['reference'],
-                fixed=fixed,active=active,active_candidate=trial,economics=econ,benefit=benefit,
+                fixed=fixed,active=active,active_candidate=adaptive_trial,held_active=held,economics=econ,benefit=benefit,
                 optimization=dict(selected_from=selected['selected_from'],fallback_to_fixed=fallback,
-                                  fixed_score=float(fixed_score),active_trial_score=float(trial_score),
+                                  fixed_score=float(fixed_score),active_trial_score=float(objective_score(adaptive_trial['summary'],s,fixed['summary'])),
+                                  evaluated_candidate_score=float(trial_score),
+                                  worsened_metrics=[k for k in ('peak_chip_C','peak_outlet_C','average_aux_W','peak_head_kPa','rms_flow_error','max_abs_flow_error') if adaptive_trial['summary'][k]>fixed['summary'][k]+1e-7],
                                   hard_pass=hard_pass,reason=reason),facility_screen=facility)
 
 def objective_score(summary,s,reference):
@@ -252,4 +267,4 @@ def objective_score(summary,s,reference):
             +s['optimization_worst_flow_weight']*float(summary['max_abs_flow_error'])
             +s['optimization_pump_weight']*float(summary['average_aux_W'])/scale_p
             +s['optimization_pressure_weight']*float(summary['peak_head_kPa'])/scale_h
-            +s['optimization_actuation_weight']*float(summary['valve_full_cycles'])/max(1.,len(reference.get('per_tray',[]))))
+            +s['optimization_actuation_weight']*float(summary['valve_full_cycles'])/max(1.,s['controlled_branches']))
