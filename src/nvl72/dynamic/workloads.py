@@ -37,7 +37,7 @@ def generate(kinds, s):
                 after = t >= s['reconnect_s']
                 connected[after,i] = np.clip((t[after]-s['reconnect_s'])/s['reconnect_ramp_s'],0,1)
             # Power disabled while disconnected and ramped with the service procedure.
-            u[:,i] *= connected[:,i]
+            # Apply the combined connection fraction once below.
     # Explicit service schedules overlay any workload, independently per tray.
     for e in s.get('service_events',[]):
         i=int(e['tray']); start=e['disconnect_s']; end=e.get('reconnect_s')
@@ -47,5 +47,5 @@ def generate(kinds, s):
             after=t>=end
             fraction[after]=np.clip((t[after]-end)/e['ramp_s'],0,1)
         connected[:,i]=np.minimum(connected[:,i],fraction)
-        u[:,i]*=fraction
+    u*=connected
     return t, u, connected

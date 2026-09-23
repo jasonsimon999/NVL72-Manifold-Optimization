@@ -10,7 +10,7 @@ from .settings import settings, validate
 from .workloads import generate
 from .hydraulic import operating_point, valve_branches, initial_positions
 from .thermal import advance
-from .control import demand, command, actuate
+from .control import demand, thermal_demand, command, actuate
 from .pump import update as pump_update
 from .economics import compare as economic_compare
 
@@ -71,7 +71,7 @@ def simulate(prepared, s, controller='fixed'):
     capacity=np.array([s[k+'_C_J_K'] for k in p['kinds']])
     opening=initial_positions(p['branches'],pb.rho,s);integral=np.zeros(n);target_open=opening.copy()
     speed=min(s['pump_max_speed'],max(s['pump_min_speed'],p['reference_speed'])) if s['pump_enabled'] else 0.
-    point=operating_point(c,p['branches'],p['props'],speed,np.ones(n),p['base_mass'])
+    point=operating_point(c,p['branches'],p['props'],speed,connection[0],p['base_mass'])
     mass=point['mass']
     # Shared physical initial condition: fixed baseline equilibrium at first load.
     outlet=p['inlet']+power[0]/np.maximum(mass*cp,1e-9)
@@ -80,12 +80,14 @@ def simulate(prepared, s, controller='fixed'):
     measured=chip.copy();rng=np.random.default_rng(int(s['seed'])+9)
     next_sensor=0.;next_control=0.;last_command=opening.copy();actuations=0
     travel=0.;energy_error=0.;pressure_error=0.;mass_error=0.
-    arrays={k:[] for k in ('chip_C','outlet_C','mass','target_mass','opening','orifice_diameter_mm','branch_dp_Pa',
+    arrays={k:[] for k in ('chip_C','outlet_C','mass','target_mass','thermal_target_unreachable','opening','orifice_diameter_mm','branch_dp_Pa',
                            'supply_Pa','return_Pa','pump_W','valve_W','speed','head_Pa',
                            'rack_head_Pa','energy_residual_W','header_velocity_m_s','removed_W','storage_W')}
     failure_index=min(n-1,max(0,int(s['failure_tray'])))
     for j,time in enumerate(t):
-        conn=connection[j];target=demand(power[j],cp,p['base_mass'],s)*(conn>0)
+        conn=connection[j]
+        target,unreachable=thermal_demand(power[j],cp,p['base_mass'],resistance,p['inlet'],s)
+        target*=conn>0
         failed=time>=s['event_s'];failure=s['failure'] if failed and active else 'none'
         if time+1e-8>=next_sensor:
             measured=chip+s['sensor_bias_K']+rng.normal(0,s['sensor_noise_K'],n)
@@ -94,7 +96,8 @@ def simulate(prepared, s, controller='fixed'):
         if active and controller!='hold' and time+1e-8>=next_control:
             if controller=='optimized':
                 from .hydraulic import size_positions
-                target_open=size_positions(p['branches'],opening,mass,target,pb.rho,s)
+                sizing_target=target*(1+np.clip(s['kp_per_K']*(measured-s['temperature_target_C']),0.,1.))
+                target_open=size_positions(p['branches'],opening,mass,sizing_target,pb.rho,s)
             else:
                 target_open,integral=command(controller,opening,measured,mass,target,integral,s,s['control_s'])
             next_control=time+s['control_s']
@@ -113,22 +116,24 @@ def simulate(prepared, s, controller='fixed'):
             hydraulic_connection[controlled&(opening<=0)]=0.
         point=operating_point(c,branches,p['props'],speed,hydraulic_connection,mass)
         mass=point['mass']
+        old_chip=chip.copy();old_outlet=outlet.copy()
         if j:
             chip,outlet,removed,res=advance(chip,outlet,power[j],mass,p['inlet'],resistance,capacity,s['coolant_C_J_K'],cp,dt)
         else:
             res=np.zeros(n);removed=mass*cp*(outlet-p['inlet'])
+        storage=(capacity*(chip-old_chip)+s['coolant_C_J_K']*(outlet-old_outlet))/dt if j else power[j]-removed
         energy_error=max(energy_error,float(np.max(abs(res))))
         pressure_error=max(pressure_error,point['pressure_error']);mass_error=max(mass_error,point['mass_error'])
         moving=abs(opening-previous)>1e-8
         valves=float(np.sum(np.where(moving,s['valve_running_W'],s['valve_holding_W'])[controlled])+s['electronics_W']) if active else 0.
         pump=max(0,point['head'])*mass.sum()/float(ps.rho)/s['pump_efficiency']
-        values=dict(chip_C=chip.copy(),outlet_C=outlet.copy(),mass=mass.copy(),target_mass=target,
+        values=dict(thermal_target_unreachable=unreachable&(conn>0),chip_C=chip.copy(),outlet_C=outlet.copy(),mass=mass.copy(),target_mass=target,
                     opening=np.where(controlled,opening,np.nan) if active else np.full(n,np.nan),
                     orifice_diameter_mm=np.array([1000*float(b.get('orifice_diameter_m') or b['diameter_m'])  for i,b in enumerate(branches)]),
                     branch_dp_Pa=point['branch_dp'],
                     supply_Pa=point['supply'],return_Pa=point['return_pressure'],pump_W=pump,valve_W=valves,
                     speed=speed,head_Pa=point['head'],rack_head_Pa=point['rack_head'],energy_residual_W=float(np.max(abs(res))),
-                    header_velocity_m_s=point['header_velocity'],removed_W=removed.copy(),storage_W=power[j]-removed-res)
+                    header_velocity_m_s=point['header_velocity'],removed_W=removed.copy(),storage_W=storage.copy())
         for k,v in values.items():arrays[k].append(v)
         speed=pump_update(speed,point,target,p['reference_head'],p['reference_speed'],s,dt,
                           lag=failed and s['failure']=='pump_lag')
@@ -138,13 +143,13 @@ def simulate(prepared, s, controller='fixed'):
     result['flow_LPM']=result['mass']/float(ps.rho)*60000
     result['target_flow_LPM']=result['target_mass']/float(ps.rho)*60000
     result['summary']=summarize(result,s,p)
-    result['summary'].update(valve_actuations=actuations,valve_full_cycles=travel/2,
+    result['summary'].update(thermal_target_unreachable=bool(result['thermal_target_unreachable'].any()),valve_actuations=actuations,valve_full_cycles=travel/2,
                              valve_travel=travel,pressure_residual_Pa=pressure_error,
                              node_mass_residual_kg_s=mass_error,energy_residual_W=energy_error)
-    result['per_tray']=[dict(tray_id=id,peak_solid_C=float(result['chip_C'][:,i].max()),
-                            peak_outlet_C=float(result['outlet_C'][:,i].max()),
-                            peak_deltaT_K=float(result['outlet_C'][:,i].max()-p['inlet']),
-                            time_above_limit_s=float(np.sum(result['chip_C'][1:,i]>s['chip_limit_C'])*dt))
+    result['per_tray']=[dict(tray_id=id,peak_solid_C=float(np.max(result['chip_C'][connection[:,i]>0,i])) if np.any(connection[:,i]>0) else None,
+                            peak_outlet_C=float(np.max(result['outlet_C'][connection[:,i]>0,i])) if np.any(connection[:,i]>0) else None,
+                            peak_deltaT_K=float(np.max(result['outlet_C'][connection[:,i]>0,i])-p['inlet']) if np.any(connection[:,i]>0) else None,
+                            time_above_limit_s=float(np.sum((result['chip_C'][1:,i]>s['chip_limit_C'])&(connection[1:,i]>0))*dt))
                         for i,id in enumerate(p['ids'])]
     return result
 
@@ -194,6 +199,10 @@ def summarize(r,s,p):
 def run_comparison(config, s=None):
     s=settings(**(s or {}));p=prepare(config,s)
     fixed=simulate(p,s,'fixed');trial=simulate(p,s,s['controller'])
+    for key in ('time_s','electrical_W','liquid_W','connected','target_mass'):
+        if not np.array_equal(fixed[key],trial[key]):raise RuntimeError('Comparison input mismatch: '+key)
+    if not np.all(fixed['orifice_diameter_mm']==fixed['orifice_diameter_mm'][0]):
+        raise RuntimeError('Fixed bores changed during the workload')
     adaptive_trial=trial
     held=simulate(p,s,'hold') if s['controller']=='optimized' else None
     if held is not None and s['failure']=='none':

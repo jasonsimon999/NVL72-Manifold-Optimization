@@ -212,3 +212,40 @@ def test_service_widgets_and_equations_render():
     assert len(result['settings']['service_events'])==2
     assert np.all(result['active_candidate']['mass'][result['active_candidate']['time_s']==20,1]==0)
     assert len(app.get('latex'))>=10
+
+
+def test_thermal_target_equation_and_unreachable():
+    from nvl72.dynamic.control import thermal_demand
+    s=settings(temperature_target_C=72.,outlet_limit_C=65.,minimum_flow_fraction=0.)
+    power=np.array([5800.,10000.]);R=np.array([.004,.004]);cp=4000.;Tin=40.
+    m,impossible=thermal_demand(power,cp,np.array([.1,.1]),R,Tin,s)
+    assert Tin+power[0]/(m[0]*cp)+R[0]*power[0]==pytest.approx(72.)
+    assert list(impossible)==[False,True]
+    assert np.all(np.isfinite(m))
+
+
+def test_fixed_equilibrium_matches_analytic_temperature(config,short):
+    s=dict(short,scenario='steady');p=prepare(config,s);r=simulate(p,s,'fixed')
+    cp=float(p['props'][0].cp)
+    R=np.array([s[k+'_R_K_W'] for k in p['kinds']])
+    predicted=p['inlet']+r['liquid_W']/(r['mass']*cp)+R*r['liquid_W']
+    np.testing.assert_allclose(r['chip_C'],predicted,atol=1e-8)
+
+
+def test_identical_inputs_fixed_bores_and_independent_storage(config,short):
+    s=dict(short,controller='optimized',scenario='rack_step',service_events=[dict(tray=3,disconnect_s=8.,reconnect_s=18.,ramp_s=4.)])
+    r=run_comparison(config,s)
+    for key in ('electrical_W','liquid_W','connected','time_s','target_mass'):
+        np.testing.assert_array_equal(r['fixed'][key],r['active_candidate'][key])
+    assert np.all(np.ptp(r['fixed']['orifice_diameter_mm'],axis=0)==0)
+    for run in (r['fixed'],r['active_candidate']):
+        Cs=np.array([s[k+'_C_J_K'] for k in run['kinds']])
+        stored=(np.diff(run['chip_C'],axis=0)*Cs+np.diff(run['outlet_C'],axis=0)*s['coolant_C_J_K'])/s['dt_s']
+        np.testing.assert_allclose(stored,run['storage_W'][1:],atol=1e-8)
+        np.testing.assert_allclose(run['liquid_W'][1:],run['removed_W'][1:]+stored,atol=1e-6)
+
+
+def test_service_overlay_does_not_multiply_power_twice():
+    s=settings(scenario='reinstall',duration_s=40.,event_s=10.,reconnect_s=20.,reconnect_ramp_s=10.,service_events=[dict(tray=0,disconnect_s=10.,reconnect_s=20.,ramp_s=10.)])
+    t,u,conn=generate(['compute','switch'],s)
+    np.testing.assert_array_equal(u[:,0],conn[:,0])

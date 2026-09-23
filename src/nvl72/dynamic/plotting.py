@@ -102,3 +102,46 @@ def paired_maps(run,arrays,titles,maps):
         ax.set_yticks(range(len(run['ids'])),run['ids'],fontsize=8)
         ax.set(title=title,xlabel='Time · s');fig.colorbar(im,ax=ax,shrink=.7)
     return fig
+
+
+def applied_loads(result):
+    """Actual forcing arrays, without smoothing or regenerated workloads."""
+    runs=[result['fixed'],result.get('active_candidate',result['active'])]
+    fig,axes=plt.subplots(2,2,figsize=(12,9),constrained_layout=True)
+    maximum=max(float(r['liquid_W'].max()) for r in runs)/1000
+    for col,(run,name) in enumerate(zip(runs,['Fixed orifices','Active orifices'])):
+        t=run['time_s'];ax=axes[0,col]
+        ax.step(t,run['electrical_W'].sum(axis=1)/1000,where='pre',color='#667085',ls='--',label='Electrical demand')
+        ax.step(t,run['liquid_W'].sum(axis=1)/1000,where='pre',color='#008c95',label='Heat entering coolant')
+        ax.set(title=name+' — rack load',xlabel='Time · s',ylabel='kW');ax.legend(fontsize=8);ax.grid(alpha=.15)
+        im=axes[1,col].imshow(run['liquid_W'].T/1000,aspect='auto',interpolation='nearest',extent=[t[0],t[-1],len(run['ids'])-.5,-.5],vmin=0,vmax=max(maximum,1e-9),cmap='inferno')
+        axes[1,col].set_yticks(range(len(run['ids'])),run['ids'],fontsize=8)
+        axes[1,col].set(title=name+' — heat by tray',xlabel='Time · s')
+    fig.colorbar(im,ax=axes[1,:],label='Applied liquid heat · kW/tray',shrink=.8)
+    return fig
+
+
+def fixed_active_bores(result):
+    runs=[result['fixed'],result.get('active_candidate',result['active'])]
+    upper=max(float(r['orifice_diameter_mm'].max()) for r in runs)
+    fig,axes=plt.subplots(1,2,figsize=(12,7),constrained_layout=True)
+    for ax,run,name in zip(axes,runs,['Fixed bore — held for the entire run','Active bore — actual actuator response']):
+        data=np.where(run['connected']>0,run['orifice_diameter_mm'],np.nan)
+        im=ax.imshow(data.T,aspect='auto',interpolation='nearest',extent=[run['time_s'][0],run['time_s'][-1],len(run['ids'])-.5,-.5],vmin=0,vmax=max(upper,1e-9),cmap=plt.get_cmap('viridis').with_extremes(bad='#d0d5dd'))
+        ax.set_yticks(range(len(run['ids'])),run['ids'],fontsize=8);ax.set(title=name,xlabel='Time · s')
+    fig.colorbar(im,ax=axes,label='Effective bore · mm',shrink=.8)
+    return fig
+
+
+def tray_audit(result,tray):
+    fixed=result['fixed'];active=result.get('active_candidate',result['active'])
+    fig,axes=plt.subplots(3,1,figsize=(10,8),sharex=True,constrained_layout=True)
+    for run,color,style,label in [(fixed,'#667085','--','Fixed'),(active,'#008c95','-','Active trial')]:
+        for ax,key,unit in zip(axes,['liquid_W','orifice_diameter_mm','chip_C'],['Applied heat · W','Bore · mm','Tray temperature · °C']):
+            ax.step(run['time_s'],run[key][:,tray],where='pre',color=color,ls=style,label=label)
+            ax.set_ylabel(unit);ax.grid(alpha=.15);ax.legend(fontsize=8)
+    axes[2].axhline(result['settings']['chip_limit_C'],ls=':',color='#c34835',label='Screening ceiling')
+    axes[2].legend(fontsize=8)
+    axes[0].set_title(f"{fixed['ids'][tray]} — same heat, fixed versus moving bore")
+    axes[-1].set_xlabel('Time · s')
+    return fig

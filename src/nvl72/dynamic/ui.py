@@ -185,6 +185,13 @@ def render(root):
                 {'Output':'Effective orifice diameter','Meaning':'Diameter implied by the variable-area surrogate at the selected time; it is not a measured valve bore.','Prefer':'Meets flow with margin'},
                 {'Output':'Optimization score','Meaning':'Weighted, dimensionless comparison used to decide whether active control is accepted.','Prefer':'Lower'},
             ]),hide_index=True,width='stretch')
+    raw=r['active_candidate']['summary'];base=r['fixed']['summary']
+    st.subheader('Did active cooling help?')
+    peak_gain=base['peak_chip_C']-raw['peak_chip_C'];mean_gain=base['mean_chip_C']-raw['mean_chip_C']
+    st.write(f"Raw active trial: peak tray temperature is {peak_gain:+.2f} °C cooler; mean tray temperature is {mean_gain:+.2f} °C cooler. Positive values are reductions; negative values mean hotter.")
+    st.caption(f"Time above the solid limit: fixed {base['time_above_limit_s']:.0f} s; active {raw['time_above_limit_s']:.0f} s. Mean temperature covers connected trays and sampled times; it is not a chip-throughput prediction.")
+    if raw.get('thermal_target_unreachable'):
+        st.warning('Some loads cannot meet the controller setpoint at any finite flow under the entered thermal resistance and inlet temperature. Change those assumptions or reduce heat; a larger bore alone cannot meet that target.')
     with st.expander('Compare all candidates — detailed results'):
         st.subheader('What the active hardware actually did')
         trial=r.get('active_candidate',r['active']);held=r.get('held_active')
@@ -193,9 +200,12 @@ def render(root):
         labels={'peak_chip_C':'Peak tray temperature · °C','peak_outlet_C':'Peak coolant outlet · °C','average_aux_W':'Pump + controls · W','peak_head_kPa':'Peak pump pressure · kPa','rms_flow_error':'Flow mismatch RMS · fraction','max_abs_flow_error':'Worst flow mismatch · fraction','time_above_limit_s':'Time over solid limit · s'}
         st.dataframe(pd.DataFrame([dict(Output=label,**{name:run['summary'][key] for name,run in comparison.items()}) for key,label in labels.items()]),hide_index=True,width='stretch',column_config={name:st.column_config.NumberColumn(format='%.3f') for name in comparison})
         st.caption('Held valves stay at their initial resistance-matching positions, within actuator bounds. Adaptive trial and held valves include active hardware losses and electricity. Selected design is an offline recommendation for this simulated workload; choosing fixed hardware is not an automatic physical bypass or a guarantee for future workloads.')
-    st.subheader('How the orifices change')
-    st.caption('Left: adaptive effective bore in mm. Right: change from fixed-design bore; zero means unchanged. Gray means disconnected. An unrestricted branch is shown at its pipe ID. The trial stays visible even when fixed hardware wins.')
-    show_figure(plotting.bore_history(r))
+    st.subheader('Exactly what heat was applied')
+    st.caption('Both columns use the actual simulation inputs. Electrical demand and liquid heat differ when less than all electrical power enters the coolant. Serviced trays have zero input while disconnected. The solver integrates endpoint values; event resolution is the timestep.')
+    show_figure(plotting.applied_loads(r))
+    st.subheader('Fixed and active orifices over time')
+    st.caption('Left: fixed bores. Right: actual active bores. Both use the same millimeter scale; gray means disconnected. Unrestricted branches show pipe ID. The raw active trial stays visible even when fixed hardware wins.')
+    show_figure(plotting.fixed_active_bores(r))
     with st.expander('How flow changes across the rack'):
         st.caption('Service effects below show delivered flow and the change from fixed flow at the same time. Positive change means active receives more coolant. Shared headers couple serviced and unserviced trays.')
         show_figure(plotting.service_response(r))
@@ -206,6 +216,7 @@ def render(root):
         st.caption('Teal traces show '+('the raw adaptive trial.' if show_trial else 'the selected design, which may be fixed.'))
         tray=st.selectbox('Tray to inspect',range(len(r['fixed']['ids'])),key='dynamic_tray',format_func=lambda i:r['fixed']['ids'][i])
         st.caption('Gray dashed = passive fixed hardware · teal solid = active hardware. Electrical power traces overlap because the workload is identical. Valve position is the commanded area position, while effective orifice diameter is the hydraulic diameter used by the solver.')
+        show_figure(plotting.tray_audit(r,tray))
         with st.expander('Detailed time traces',expanded=False):
             show_figure(plotting.time_series(view,tray))
         with st.expander('All tray values & heat maps'):
@@ -301,7 +312,8 @@ $C_f\,dT_f/dt=(T_s-T_f)/R-\dot m c_p(T_f-T_{in})$.
 Both equations use conservative implicit Euler. $T_f$ is the well-mixed tray coolant outlet.
 Representative $T_s$ is an equivalent solid/cold-plate node, not a resolved GPU junction.
 
-$\dot m_{target}=\max(P_{liquid}/(c_p\Delta T_{target}),\dot m_{minimum})$.
+$\Delta T_{allow}=\min(\Delta T_{target},T_{out,limit}-T_{in},T_{set}-T_{in}-RP)$.
+$\dot m_{target}=\max(P_{liquid}/(c_p\Delta T_{allow}),\dot m_{minimum})$.
 Flow error is $(\dot m_i-\dot m_{target,i})/\dot m_{target,i}$; disconnected branches are excluded.
 Temperature PI opens on positive $T_{measured}-T_{target}$ with anti-windup.
 Feed-forward uses power-derived demand plus flow tracking; combined control adds temperature correction.
@@ -328,7 +340,7 @@ def render_equations():
         ('Effective bore',r'd=D_{max}\sqrt{f_{min}+(1-f_{min})u}', 'Opening u controls area; diameter follows its square root.'),
         ('Permanent orifice loss',r'\Delta p_o=K_o\dot m^2,\quad K_o=\frac{[\sqrt{1-\beta^4(1-C_d^2)}-C_d\beta^2]^2}{2\rho C_d^2 A_o^2},\quad\beta=d/D', 'This pressure-recovery relation is shared with the fixed model. Cd requires calibration.'),
         ('Diameter sizing feedback',r'K_{o,new}=K_{o,current}\left(\frac{\dot m_{actual}}{\dot m_{target}}\right)^2', 'Invert the permanent-loss equation to find bore, bound it to the valve range, apply actuator lag, then solve the coupled network again. Local pressure is assumed fixed only during this sizing step.'),
-        ('Thermal demand',r'\dot m_{target}=\max\left(\frac{P_{liquid}}{c_p\Delta T_{target}},\dot m_{minimum}\right)', 'Required coolant flow from the selected temperature rise; a disconnected tray has zero demand.'),
+        ('Thermal demand',r'\begin{aligned}\Delta T_{allow}&=\min(\Delta T_{target},T_{out,limit}-T_{in},T_{set}-T_{in}-RP)\\\dot m_{target}&=\max\left(\frac{P}{c_p\Delta T_{allow}},\dot m_{minimum}\right)\end{aligned}', 'Shared thermal flow target for both designs; includes coolant and solid temperature goals. Nonpositive available rise is flagged as unreachable and uses the original coolant-rise demand. Disconnected trays have zero demand.'),
         ('Solid heat storage',r'C_s\frac{dT_s}{dt}=P_{liquid}-\frac{T_s-T_f}{R}', 'Tray power heats the solid; the thermal resistance transfers heat to coolant.'),
         ('Coolant heat storage',r'C_f\frac{dT_f}{dt}=\frac{T_s-T_f}{R}-\dot m c_p(T_f-T_{in})', 'Heat entering coolant is either stored locally or carried out by flow.'),
         ('Pump electricity',r'P_{electric}=\Delta p Q/\eta,\qquad E=\sum_{j=1}^{n}P_j\Delta t', 'Power includes actual head and flow. Auxiliary energy also includes controls.'),
@@ -341,6 +353,7 @@ def render_equations():
 
 def output_help(key):
     notes={
+      'thermal_target_unreachable':'At least one positive heat load has no finite steady flow that can meet the chosen thermal setpoint.',
       'peak_compute_C':'Hottest connected compute tray thermal node during the run.',
       'peak_switch_C':'Hottest connected switch tray thermal node during the run.',
       'peak_chip_C':'Hottest connected tray thermal node; not a resolved chip junction.',
