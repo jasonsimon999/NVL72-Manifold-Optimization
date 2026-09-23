@@ -43,7 +43,7 @@ with st.sidebar:
     if st.button('🔄 Dynamic flow control', key='sidebar_dynamic_flow', use_container_width=True):
         st.session_state['show_dynamic_flow'] = True
         st.rerun()
-    st.caption('Use the fixed page to design the passive manifold. Use the dynamic page to test transient workloads, active valves, failures, energy, and payback.')
+    st.caption('Fixed = design the manifold. Dynamic = test changing loads.')
     st.divider()
 REVISION=model_fingerprint(PROJECT_ROOT)
 
@@ -135,19 +135,20 @@ with summary_column:
     st.markdown('**What to look for**')
     st.write('Aim for low flow mismatch while keeping temperatures and pump requirements within the configured limits. Adding a restriction can improve flow sharing but increases pumping effort.')
 
-overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Hydraulics & bores','Chip temperatures','Compare & explore','Equations & data'])
+overview,hydraulics,thermal,compare,details=st.tabs(['Flow & cooling','Pressure & orifices','Temperatures','Compare designs','Equations & help'])
 with overview:
     filter_kind=st.radio('Trays to show',['All trays','Compute trays','Switch trays'],horizontal=True)
     visible=df if filter_kind=='All trays' else df[df.tray_type==('compute' if filter_kind=='Compute trays' else 'switch')]
     st.subheader('Target versus actual flow')
-    st.caption('Grey = target · teal = actual. Compare each pair: short teal bars receive less than their target flow. Exact values are in Equations & data → Full tray results.')
+    st.caption('Grey = target · teal = actual. Compare each pair: short teal bars receive less than their target flow. Expand Full tray results in Equations & help for exact values.')
     st.pyplot(charts.flow_figure(visible),use_container_width=True)
     with st.expander('Which trays receive too little or too much?'):
         st.pyplot(charts.flow_error_figure(visible),use_container_width=True)
         st.caption('Orange below zero = below target; teal above zero = above target. Flow error alone is not a thermal-limit failure.')
-    st.subheader('Coolant outlet temperature')
-    st.pyplot(charts.temperature_figure(visible,ref,c['constraints']['branch_outlet_max_C']),use_container_width=True)
-    st.caption('Teal = current · dashed grey = reference · orange = configured outlet ceiling. The temperature axis is expanded to show differences.')
+    with st.expander('Coolant temperatures by tray'):
+        st.subheader('Coolant outlet temperature')
+        st.pyplot(charts.temperature_figure(visible,ref,c['constraints']['branch_outlet_max_C']),use_container_width=True)
+        st.caption('Teal = current · dashed grey = reference · orange = configured outlet ceiling. The temperature axis is expanded to show differences.')
 with hydraulics:
     st.caption('Pressure drop is the pumping effort needed to move coolant through the rack. Larger bars identify the largest contributors.')
     st.subheader('Where the pump pressure goes')

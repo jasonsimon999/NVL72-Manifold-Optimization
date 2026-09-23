@@ -34,31 +34,34 @@ def render(root):
     if st.button('🎛️ Return to Fixed-Orifice Manifold', help='Return to the passive fixed-orifice page in this same Streamlit tab.'):
         st.session_state['show_dynamic_flow'] = False
         st.rerun()
-    st.markdown('**Does actively varying coolant flow to individual trays provide enough thermal and pumping-energy benefit to justify its added cost and complexity compared with an optimized passive fixed-orifice manifold?**')
-    st.caption('1 · Choose a workload   →   2 · Compare the same hardware boundary   →   3 · Check thermal limits and net savings')
-    st.info('Research model: temperatures represent an equivalent tray thermal node, not a validated hottest GPU junction. Workloads, thermal inertia, valve sizing and installed costs are assumptions. The fixed-orifice homepage is unchanged.')
+    st.caption('Test changing heat loads and tray removal. See whether adjustable orifices help.')
+    st.caption('1. Choose a workload → 2. Run comparison → 3. Read the result below.')
+    st.caption('Engineering estimates. Tray temperatures and valve behavior need hardware validation.')
     revision=model_fingerprint(root)
     options=['Optimized per-tray reference']
     if 'dynamic_baseline_config' in st.session_state:options.insert(0,'Current fixed-page design — unchanged')
     with st.sidebar:
         st.markdown('## Dynamic controls')
-        st.caption('Change the compact set of inputs here, then run the comparison. Expand the assumption groups below when needed.')
+        st.caption('Choose a workload and run. Defaults are ready to use.')
         selection=st.selectbox('Passive reference design',options,key='dynamic_reference',help='The optimized reference uses the existing analytical minimum-head location-balancing routine at fixed geometry. It is not a global geometry optimum. Imported designs are never automatically redesigned.')
         scenario=st.selectbox('Workload / service event',SCENARIOS,index=3,key='dynamic_scenario',format_func=lambda x:x.replace('_',' ').title(),help='The same generated electrical workload is applied to the fixed and active trials.')
-        controller=st.selectbox('Active control strategy',['optimized','combined','feedforward','reactive'],index=0,key='dynamic_controller',format_func=lambda x:{'optimized':'Adaptive sizing + fixed-design comparison','combined':'Power + temperature feedback','feedforward':'Power target + flow tracking','reactive':'Temperature PI'}[x],help='Adaptive sizing inverts the hydraulic loss equation for each branch flow target; the comparison automatically falls back to fixed hardware if it is not better.')
-        pump=st.selectbox('Pump control — same for both designs',['demand','constant_speed','constant_dp'],key='dynamic_pump',format_func=lambda x:{'demand':'Demand-following variable speed','constant_speed':'Constant speed','constant_dp':'Constant differential pressure'}[x],help='Both designs use the same pump policy. This is a coupled network solve, not an assumed pump-power ratio.')
         duration=st.number_input('Simulation duration · s',60.,3600.,300.,60.,key='dynamic_duration',help='Longer runs expose actuator travel and recovery behavior.')
-        price=st.number_input('Electricity · $/kWh',0.,5.,.12,.01,key='dynamic_price')
-        cost_case=st.selectbox('Hardware cost case',['low','nominal','high'],index=1,key='dynamic_cost_case')
+        with st.expander('Control strategy & pump — advanced'):
+            controller=st.selectbox('Active control strategy',['optimized','combined','feedforward','reactive'],index=0,key='dynamic_controller',format_func=lambda x:{'optimized':'Adaptive sizing + fixed-design comparison','combined':'Power + temperature feedback','feedforward':'Power target + flow tracking','reactive':'Temperature PI'}[x],help='Adaptive sizing inverts the hydraulic loss equation for each branch flow target; the comparison automatically falls back to fixed hardware if it is not better.')
+            pump=st.selectbox('Pump control — same for both designs',['demand','constant_speed','constant_dp'],key='dynamic_pump',format_func=lambda x:{'demand':'Demand-following variable speed','constant_speed':'Constant speed','constant_dp':'Constant differential pressure'}[x],help='Both designs use the same pump policy. This is a coupled network solve, not an assumed pump-power ratio.')
+        with st.expander('Energy prices & hardware costs'):
+            price=st.number_input('Electricity · $/kWh',0.,5.,.12,.01,key='dynamic_price')
+            cost_case=st.selectbox('Hardware cost case',['low','nominal','high'],index=1,key='dynamic_cost_case')
         run_requested=False
         if st.button('← Fixed-orifice manifold',key='dynamic_sidebar_back',use_container_width=True):
             st.session_state['show_dynamic_flow']=False;st.rerun()
         st.divider()
-        st.caption('Optimized mode evaluates adaptive and stationary valves, then recommends fixed hardware unless an active candidate improves the score without worsening protected thermal, flow, power or head metrics. Fault modes show the actual faulty trial.')
+        st.caption('Fixed hardware is retained when no qualifying improvement is found.')
     try:
         c=deepcopy(st.session_state['dynamic_baseline_config']) if selection.startswith('Current') else optimized_reference(root,revision)
     except (ValueError,RuntimeError) as exc:st.error(str(exc));return
-    st.caption('Workload pulses vary compute utilization; switch heat remains at its configured reference except during service. All spike times and service ramps are synthetic test inputs. Use a timestep smaller than the shortest event.')
+    with st.expander('How the comparison works'):
+        st.caption('Workload pulses vary compute utilization; switch heat remains at its configured reference except during service. All spike times and service ramps are synthetic test inputs. Use a timestep smaller than the shortest event.')
     with st.sidebar.expander('Baseline, coolant and CDU details'):
         st.write(f"{c['name']} · {c['coolant']['type']} · {c['rack']['supply_C']} °C supply · {c['rack']['flow_LPM']} L/min design flow")
         st.caption('Export a fixed-orifice YAML from the original page to compare a saved design. This page freezes its bores for the full transient.')
@@ -69,10 +72,12 @@ def render(root):
                 c['coolant']['property_file']=str(root/'data/coolant_properties.csv')
             except (ValueError,TypeError,yaml.YAMLError) as exc:st.error(f'Invalid design: {exc}');return
         st.json(portable_config(c),expanded=False)
-    service_trays=st.sidebar.multiselect('Trays to service',range(len(c['rack']['layout'])),format_func=lambda i:c['rack']['layout'][i],key='service_trays',help='Choose trays, then edit individual timing below.')
+    with st.sidebar.expander('Service trays — optional'):
+        service_trays=st.multiselect('Trays to service',range(len(c['rack']['layout'])),format_func=lambda i:c['rack']['layout'][i],key='service_trays',help='Choose trays, then edit individual timing below.')
     with st.sidebar, st.form('dynamic_configuration'):
+        submitted=st.form_submit_button('Run fixed vs active comparison',type='primary',use_container_width=True)
         s=dict(deepcopy(DEFAULTS),scenario=scenario,controller=controller,pump_mode=pump,duration_s=duration,electricity_per_kWh=price,cost_case=cost_case)
-        with st.expander('Workload, thermal response, valves, sensors and pump — advanced'):
+        with st.expander('Advanced simulation settings'):
             st.caption('All settings are available here. Fractions run from 0 to 1. Use smaller timesteps to check transient accuracy. The motorized actuator default takes 90 s for a full stroke; faster valves must be justified separately.')
             groups={
                 'Workload & maintenance':['low_load','high_load','spike_s','duty','correlation','ramp_per_s','localized_count','seed','event_s','reconnect_s','reconnect_ramp_s'],
@@ -101,7 +106,7 @@ def render(root):
                 ramp=st.number_input('Reconnect ramp · s',min_value=.1,value=20.,key=f'service_ramp_{i}')
                 s['service_events'].append(dict(tray=i,disconnect_s=start,reconnect_s=end,ramp_s=ramp))
             st.caption('Timing is resolved on the simulation timestep. Events between samples take effect at the next sample. Preset removal scenarios also remain active.')
-        with st.expander('Fault injection'):
+        with st.expander('Fault testing — advanced'):
             # Radio/number inputs keep the compact sidebar selectbox order
             # stable for Streamlit Cloud and make the fault controls easier to
             # scan than two additional drop-downs.
@@ -109,13 +114,12 @@ def render(root):
             s['failure_tray']=st.number_input('Affected tray index',0,len(c['rack']['layout'])-1,0,1,help='Zero-based tray index; the rack map and exported IDs show the corresponding tray name.')
             s['sensor_failure_bias_K']=st.number_input('Fault sensor bias magnitude · K',0.,40.,8.)
             st.caption('Faults begin at event time. Communications fallback assumes actuator power remains. A mechanical stuck valve ignores fallback commands.')
-        with st.expander('Cost assumptions & annualization'):
+        with st.expander('Detailed cost assumptions'):
             s['operating_hours']=st.number_input('Annual operating hours represented by this workload',0.,8760.,8760.)
             s['payback_horizon_years']=st.number_input('Break-even horizon · years',1.,30.,5.)
             st.caption('Annualization assumes this short scenario repeats for these hours. Cost ranges are budgets, not quotes. Flow sensors are included because feed-forward control tracks measured branch flow.')
             edited=st.data_editor(pd.DataFrame(COSTS).rename_axis('item').reset_index(),hide_index=True,disabled=['item'],key='dynamic_cost_table')
             s['costs']=dict(zip(edited['item'],edited[cost_case]))
-        submitted=st.form_submit_button('Run fixed vs active comparison',type='primary')
     submitted = submitted or run_requested
     try:s=settings(**s)
     except ValueError as exc:st.error(str(exc));return
@@ -168,7 +172,7 @@ def render(root):
         cards[0].metric('Pump energy reduction',f"{b['pump_reduction_percent']:.1f}%" if b['pump_reduction_percent'] is not None else 'N/A')
         cards[1].metric('Net savings / rack IT power',f"{b['savings_percent_IT']:.3f}%" if b['savings_percent_IT'] is not None else 'N/A')
         st.caption('Net savings subtract valve and electronics electricity. Flow mismatch penalizes both excess and insufficient flow: a large RMS does not by itself mean overheating. Check temperature limits and signed flow differences too.')
-        st.caption(f"Optimization score: fixed {opt.get('fixed_score',float('nan')):.3f} · active trial {opt.get('active_trial_score',float('nan')):.3f}. The score is a transparent weighted screen, not a global optimum.")
+        st.caption(f"Comparison score: fixed {opt.get('fixed_score',float('nan')):.3f} · active trial {opt.get('active_trial_score',float('nan')):.3f}. The score is a transparent weighted screen, not a global optimum.")
         st.write(conclusion(r))
         with st.expander('What each output means'):
             st.dataframe(pd.DataFrame([
@@ -181,55 +185,62 @@ def render(root):
                 {'Output':'Effective orifice diameter','Meaning':'Diameter implied by the variable-area surrogate at the selected time; it is not a measured valve bore.','Prefer':'Meets flow with margin'},
                 {'Output':'Optimization score','Meaning':'Weighted, dimensionless comparison used to decide whether active control is accepted.','Prefer':'Lower'},
             ]),hide_index=True,width='stretch')
-    st.subheader('What the active hardware actually did')
-    trial=r.get('active_candidate',r['active']);held=r.get('held_active')
-    comparison={'Fixed':r['fixed'],'Adaptive trial':trial,'Selected design':r['active']}
-    if held is not None:comparison['Held valves']=held
-    labels={'peak_chip_C':'Peak tray temperature · °C','peak_outlet_C':'Peak coolant outlet · °C','average_aux_W':'Pump + controls · W','peak_head_kPa':'Peak pump pressure · kPa','rms_flow_error':'Flow mismatch RMS · fraction','max_abs_flow_error':'Worst flow mismatch · fraction','time_above_limit_s':'Time over solid limit · s'}
-    st.dataframe(pd.DataFrame([dict(Output=label,**{name:run['summary'][key] for name,run in comparison.items()}) for key,label in labels.items()]),hide_index=True,width='stretch',column_config={name:st.column_config.NumberColumn(format='%.3f') for name in comparison})
-    st.caption('Held valves stay at their initial resistance-matching positions, within actuator bounds. Adaptive trial and held valves include active hardware losses and electricity. Selected design is an offline recommendation for this simulated workload; choosing fixed hardware is not an automatic physical bypass or a guarantee for future workloads.')
-    st.subheader('Every tray: bore size and service response')
+    with st.expander('Compare all candidates — detailed results'):
+        st.subheader('What the active hardware actually did')
+        trial=r.get('active_candidate',r['active']);held=r.get('held_active')
+        comparison={'Fixed':r['fixed'],'Adaptive trial':trial,'Selected design':r['active']}
+        if held is not None:comparison['Held valves']=held
+        labels={'peak_chip_C':'Peak tray temperature · °C','peak_outlet_C':'Peak coolant outlet · °C','average_aux_W':'Pump + controls · W','peak_head_kPa':'Peak pump pressure · kPa','rms_flow_error':'Flow mismatch RMS · fraction','max_abs_flow_error':'Worst flow mismatch · fraction','time_above_limit_s':'Time over solid limit · s'}
+        st.dataframe(pd.DataFrame([dict(Output=label,**{name:run['summary'][key] for name,run in comparison.items()}) for key,label in labels.items()]),hide_index=True,width='stretch',column_config={name:st.column_config.NumberColumn(format='%.3f') for name in comparison})
+        st.caption('Held valves stay at their initial resistance-matching positions, within actuator bounds. Adaptive trial and held valves include active hardware losses and electricity. Selected design is an offline recommendation for this simulated workload; choosing fixed hardware is not an automatic physical bypass or a guarantee for future workloads.')
+    st.subheader('How the orifices change')
     st.caption('Left: adaptive effective bore in mm. Right: change from fixed-design bore; zero means unchanged. Gray means disconnected. An unrestricted branch is shown at its pipe ID. The trial stays visible even when fixed hardware wins.')
     show_figure(plotting.bore_history(r))
-    st.caption('Service effects below show delivered flow and the change from fixed flow at the same time. Positive change means active receives more coolant. Shared headers couple serviced and unserviced trays.')
-    show_figure(plotting.service_response(r))
-    timeline,energy,reliability,explore,equations=st.tabs(['Performance over time','Energy & economics','Reliability','Studies & sensitivity','Equations & sources'])
+    with st.expander('How flow changes across the rack'):
+        st.caption('Service effects below show delivered flow and the change from fixed flow at the same time. Positive change means active receives more coolant. Shared headers couple serviced and unserviced trays.')
+        show_figure(plotting.service_response(r))
+    timeline,energy,reliability,explore,equations=st.tabs(['Flow & temperature','Costs','Checks','Advanced studies','Equations & help'])
     with timeline:
         show_trial=st.toggle('Show raw adaptive trial (including rejected designs)',value=True)
         view=dict(r,active=trial) if show_trial else r
         st.caption('Teal traces show '+('the raw adaptive trial.' if show_trial else 'the selected design, which may be fixed.'))
         tray=st.selectbox('Tray to inspect',range(len(r['fixed']['ids'])),key='dynamic_tray',format_func=lambda i:r['fixed']['ids'][i])
         st.caption('Gray dashed = passive fixed hardware · teal solid = active hardware. Electrical power traces overlap because the workload is identical. Valve position is the commanded area position, while effective orifice diameter is the hydraulic diameter used by the solver.')
-        show_figure(plotting.time_series(view,tray))
-        variable=st.selectbox('Rack heat map',['chip_C','flow_LPM','flow_error','electrical_W','opening'],key='dynamic_heatmap',format_func=lambda x:{'chip_C':'Representative temperature · °C','flow_LPM':'Flow · L/min','flow_error':'Thermal-target error · %','electrical_W':'Electrical demand · W','opening':'Actuator position · fraction'}[x])
-        show_figure(plotting.heatmap(view,variable))
-        st.dataframe(pd.DataFrame(r['active']['per_tray']),hide_index=True,width='stretch')
-        if 'orifice_diameter_mm' in r['active']:
-            candidate=r.get('active_candidate',r['active'])
-            bore_frame=pd.DataFrame({'Tray':r['active']['ids'],'Fixed bore · mm':r['fixed']['orifice_diameter_mm'][-1],
-                                     'Trial active bore · mm':candidate['orifice_diameter_mm'][-1],
-                                     'Displayed active bore · mm':r['active']['orifice_diameter_mm'][-1]})
-            st.dataframe(bore_frame,hide_index=True,width='stretch')
-        st.caption('Bore table shows the final timestep. Peak solid temperature is the representative thermal-node ceiling check. Flow mismatch compares actual branch mass flow with the power-derived target. Effective bore is the diameter implied by the variable area surrogate. “Trial active” is retained for audit; “displayed active” is the accepted design after the fallback rule.')
+        with st.expander('Detailed time traces',expanded=False):
+            show_figure(plotting.time_series(view,tray))
+        with st.expander('All tray values & heat maps'):
+            variable=st.selectbox('Rack heat map',['chip_C','flow_LPM','flow_error','electrical_W','opening'],key='dynamic_heatmap',format_func=lambda x:{'chip_C':'Representative temperature · °C','flow_LPM':'Flow · L/min','flow_error':'Thermal-target error · %','electrical_W':'Electrical demand · W','opening':'Actuator position · fraction'}[x])
+            show_figure(plotting.heatmap(view,variable))
+            st.dataframe(pd.DataFrame(r['active']['per_tray']),hide_index=True,width='stretch')
+            if 'orifice_diameter_mm' in r['active']:
+                candidate=r.get('active_candidate',r['active'])
+                bore_frame=pd.DataFrame({'Tray':r['active']['ids'],'Fixed bore · mm':r['fixed']['orifice_diameter_mm'][-1],
+                                         'Trial active bore · mm':candidate['orifice_diameter_mm'][-1],
+                                         'Displayed active bore · mm':r['active']['orifice_diameter_mm'][-1]})
+                st.dataframe(bore_frame,hide_index=True,width='stretch')
+            st.caption('Bore table shows the final timestep. Peak solid temperature is the representative thermal-node ceiling check. Flow mismatch compares actual branch mass flow with the power-derived target. Effective bore is the diameter implied by the variable area surrogate. “Trial active” is retained for audit; “displayed active” is the accepted design after the fallback rule.')
     with energy:
         st.subheader('Does the pump saving survive the added hardware?')
-        st.dataframe(pd.DataFrame([{'Output':key.replace('_',' ').capitalize(),'Value':str(value),'Meaning':output_help(key)} for key,value in e.items() if key!='cost_inputs']),hide_index=True,width='stretch')
+        with st.expander('All cost calculations'):
+            st.dataframe(pd.DataFrame([{'Output':key.replace('_',' ').capitalize(),'Value':str(value),'Meaning':output_help(key)} for key,value in e.items() if key!='cost_inputs']),hide_index=True,width='stretch')
         st.write(f"Net auxiliary energy saved: **{e['annual_kWh_saved']:.1f} kWh/year**. Annual savings after maintenance: **${e['annual_savings']:,.0f}**. Simple payback: **{format_payback(e['payback_years'])}**.")
-        st.subheader('When does active flow control become worthwhile?')
-        st.write(f"At the chosen {s['payback_horizon_years']:g}-year horizon, the affordable incremental installed cost is **${e['affordable_incremental_capex']:,.0f} total**, or **${e['affordable_installed_increment_per_branch']:,.0f} per controlled branch**.")
-        st.write(f"Break-even electricity price: **${e['break_even_price']:.2f}/kWh**." if e['break_even_price'] is not None else 'No positive electricity price produces energy-only payback here because net auxiliary energy is not reduced.')
-        cases=[]
-        from .economics import compare
-        for case in COSTS:
-            case_s=dict(s,cost_case=case);case_s.pop('costs',None)
-            cases.append(dict(case=case,**{k:v for k,v in compare(f,a,case_s,(0 if opt.get('fallback_to_fixed') else min(27,int(s['controlled_branches'])))).items() if k!='cost_inputs'}))
-        st.dataframe(pd.DataFrame(cases),hide_index=True,width='stretch')
-        st.caption('Undiscounted cash flow; excludes cooling-plant energy, IT throughput value, financing, downtime and speculative reliability probabilities. Thermal failures invalidate an energy-only recommendation.')
+        with st.expander('Payback & cost scenarios'):
+            st.subheader('When does active flow control become worthwhile?')
+            st.write(f"At the chosen {s['payback_horizon_years']:g}-year horizon, the affordable incremental installed cost is **${e['affordable_incremental_capex']:,.0f} total**, or **${e['affordable_installed_increment_per_branch']:,.0f} per controlled branch**.")
+            st.write(f"Break-even electricity price: **${e['break_even_price']:.2f}/kWh**." if e['break_even_price'] is not None else 'No positive electricity price produces energy-only payback here because net auxiliary energy is not reduced.')
+            cases=[]
+            from .economics import compare
+            for case in COSTS:
+                case_s=dict(s,cost_case=case);case_s.pop('costs',None)
+                cases.append(dict(case=case,**{k:v for k,v in compare(f,a,case_s,(0 if opt.get('fallback_to_fixed') else min(27,int(s['controlled_branches'])))).items() if k!='cost_inputs'}))
+            st.dataframe(pd.DataFrame(cases),hide_index=True,width='stretch')
+            st.caption('Undiscounted cash flow; excludes cooling-plant energy, IT throughput value, financing, downtime and speculative reliability probabilities. Thermal failures invalidate an energy-only recommendation.')
     with reliability:
         st.write(f"The active hardware trial uses {min(27,int(s['controlled_branches']))} controlled valves plus sensors and electronics. A selected fixed design uses no active components. Faults are shown as simulated; selection does not erase their consequences.")
-        st.dataframe(pd.DataFrame({'Fixed':{k:str(v) for k,v in f.items()},'Selected':{k:str(v) for k,v in a.items()},'Meaning':{key:output_help(key) for key in f}}).rename_axis('Output').reset_index(),hide_index=True,width='stretch')
-        st.caption('Actuations count command changes above deadband; equivalent full cycles = accumulated normalized travel / 2. Saturation is time with any valve near an end stop. Recovery means all thermal limits remain satisfied thereafter, not return to the original hydraulic state.')
-        st.caption('Dripless-QD closure sets disconnected flow exactly to zero and disables its heat input. Detached stored temperatures are tracked but excluded from operating thermal screens. Reinstallation ramps connection area and tray power; its warm trapped coolant is included again. Air purge, water hammer and residual spill volumes are not modeled.')
+        with st.expander('All reliability & numerical checks'):
+            st.dataframe(pd.DataFrame({'Fixed':{k:str(v) for k,v in f.items()},'Selected':{k:str(v) for k,v in a.items()},'Meaning':{key:output_help(key) for key in f}}).rename_axis('Output').reset_index(),hide_index=True,width='stretch')
+            st.caption('Actuations count command changes above deadband; equivalent full cycles = accumulated normalized travel / 2. Saturation is time with any valve near an end stop. Recovery means all thermal limits remain satisfied thereafter, not return to the original hydraulic state.')
+            st.caption('Dripless-QD closure sets disconnected flow exactly to zero and disables its heat input. Detached stored temperatures are tracked but excluded from operating thermal screens. Reinstallation ramps connection area and tray power; its warm trapped coolant is included again. Air purge, water hammer and residual spill volumes are not modeled.')
     with explore:
         st.caption('These studies run explicitly so normal controls remain responsive. They can take several minutes. Each study preserves the selected passive hardware; no controller is assumed superior.')
         choices={'Workload scenarios':studies.scenario_study,'Controllers × pump modes':studies.strategy_study,

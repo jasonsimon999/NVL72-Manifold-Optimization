@@ -10,35 +10,36 @@ from .dashboard_support import apply_yaml_overrides
 def controls(root,base):
     with st.sidebar:
         st.markdown('### Design controls')
-        st.caption('Change a dimension → compare flow, temperatures and pump duty.')
+        st.caption('Start with flow and pipe size. Results update automatically.')
         flow=st.slider('Rack flow [L/min]',20.,300.,120.,1.,key='rack_flow',help='Total coolant volume through the rack each minute. More flow usually lowers coolant temperature rise but increases pumping effort. Pump mode solves its own flow.')
         diameter=st.slider('Main header ID [mm]',15.,65.,38.,.5,key='header_id',help='Main supply and return internal diameter, independent of tray QDs.')
-        balancing=st.selectbox('Balancing representation',['Automatic equivalent orifices','Manual orifice bores','Resistance coefficients'],key='balancing')
-        if balancing=='Manual orifice bores':
-            st.caption('Enter a physical hole size for each tray type. Smaller holes add more resistance. Enter 0 for no plate.')
-        elif balancing=='Automatic equivalent orifices':
-            st.caption('Choose added resistance below; the model calculates an equivalent hole size. See Hydraulics & bores for the resulting dimensions.')
-        else:
-            st.caption('Study added resistance directly, without assigning a physical orifice bore.')
-        with st.container(border=True):
-            st.markdown('**Tray geometry**')
-            st.caption('ID = internal diameter. Branch = tray hose; QD = quick disconnect; orifice = added balancing hole.')
-            left,right=st.columns(2)
-            values={}
-            for kind,col,dflt in [('compute',left,8.),('switch',right,6.)]:
-                with col:
-                    st.markdown(f'**{kind.title()}**')
-                    bd=st.number_input(f'{kind.title()} branch ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_branch',help='Inside diameter of this tray type’s tubing. A larger ID usually reduces tubing pressure loss; it does not change the QD or cold plate.')
-                    qd=st.number_input(f'{kind.title()} QD ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_qd',help='Flow bore, not AN size. Diameter alone uses the assumed QD scaling below.')
-                    if balancing=='Manual orifice bores':
-                        bore=st.number_input(f'{kind.title()} orifice bore [mm; 0 none]',min_value=0.,max_value=30.,value=0.,step=.1,key=f'{kind}_bore',help='Applies to every tray of this class. Must be smaller than branch ID.')
-                        kh=0.
-                    else:
-                        bore=0.
-                        kh=st.number_input(f'{kind.title()} restriction [million Pa/(kg/s)²]',min_value=0.,max_value=500.,value=0.,step=1.,key=f'{kind}_restriction',help='Added resistance to flow. Larger values restrict this tray type more and give smaller equivalent bores in Automatic mode.')*1e6
-                    values[kind]=(bd,qd,bore,kh)
-            st.caption('Automatic: resistance → equivalent bore. Manual: enter the bore directly. Zero means no added plate.')
-        with st.expander('Operating conditions & load'):
+        with st.expander('Orifices & tray connections'):
+            balancing=st.selectbox('Balancing representation',['Automatic equivalent orifices','Manual orifice bores','Resistance coefficients'],key='balancing')
+            if balancing=='Manual orifice bores':
+                st.caption('Enter a physical hole size for each tray type. Smaller holes add more resistance. Enter 0 for no plate.')
+            elif balancing=='Automatic equivalent orifices':
+                st.caption('Choose added resistance below; the model calculates an equivalent hole size. See Hydraulics & bores for the resulting dimensions.')
+            else:
+                st.caption('Study added resistance directly, without assigning a physical orifice bore.')
+            with st.container(border=True):
+                st.markdown('**Tray geometry**')
+                st.caption('ID = internal diameter. Branch = tray hose; QD = quick disconnect; orifice = added balancing hole.')
+                left,right=st.columns(2)
+                values={}
+                for kind,col,dflt in [('compute',left,8.),('switch',right,6.)]:
+                    with col:
+                        st.markdown(f'**{kind.title()}**')
+                        bd=st.number_input(f'{kind.title()} branch ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_branch',help='Inside diameter of this tray type’s tubing. A larger ID usually reduces tubing pressure loss; it does not change the QD or cold plate.')
+                        qd=st.number_input(f'{kind.title()} QD ID [mm]',min_value=1.,max_value=30.,value=dflt,step=.25,key=f'{kind}_qd',help='Flow bore, not AN size. Diameter alone uses the assumed QD scaling below.')
+                        if balancing=='Manual orifice bores':
+                            bore=st.number_input(f'{kind.title()} orifice bore [mm; 0 none]',min_value=0.,max_value=30.,value=0.,step=.1,key=f'{kind}_bore',help='Applies to every tray of this class. Must be smaller than branch ID.')
+                            kh=0.
+                        else:
+                            bore=0.
+                            kh=st.number_input(f'{kind.title()} restriction [million Pa/(kg/s)²]',min_value=0.,max_value=500.,value=0.,step=1.,key=f'{kind}_restriction',help='Added resistance to flow. Larger values restrict this tray type more and give smaller equivalent bores in Automatic mode.')*1e6
+                        values[kind]=(bd,qd,bore,kh)
+                st.caption('Automatic: resistance → equivalent bore. Manual: enter the bore directly. Zero means no added plate.')
+        with st.expander('Coolant & heat load'):
             st.caption('Set the test conditions. TCS is the rack coolant loop; load fraction scales the modeled chip heat (1.0 = full reference load).')
             supply=st.slider('TCS supply [°C]',10.,60.,40.,.5,key='supply')
             coolant=st.selectbox('Coolant',['PG25','water','EG50','PG25_Dow2023'],key='coolant',help='PG25 is the legacy assumption profile. PG25_Dow2023 is a versioned manufacturer table. EG50 is not hardware-qualified.')
@@ -59,7 +60,7 @@ def controls(root,base):
             capacity=st.number_input('Available facility duty [kW; 0 unknown]',min_value=0.,value=0.,step=100.)
             ua=st.number_input('Evaluated HX UA [kW/K; 0 unknown]',min_value=0.,value=0.,step=1.)
             st.caption('Flow and duty apply to this CDU. More facility flow does not directly increase rack flow.')
-        with st.expander('Hydraulic calibration & taper'):
+        with st.expander('Advanced: component losses & taper'):
             st.caption('Use component data here when available. Taper reduces header size toward the tip; Cd describes how the orifice passes flow; Kh describes pressure loss.')
             taper=st.slider('Tip / main diameter ratio',.4,1.,1.,.01)
             gravity=st.checkbox('Include gravity',True)
@@ -73,7 +74,7 @@ def controls(root,base):
                 b['qdc_K']=st.number_input(f'{kind.title()} reference QD Kh [million]',min_value=0.,value=b['qdc_K']/1e6,step=.1)*1e6
                 b['qdc_reference_diameter_m']=st.number_input(f'{kind.title()} reference QD ID [mm]',min_value=1.,value=8. if kind=='compute' else 6.,step=.25)/1000
                 b['qdc_reference_density_kg_m3']=st.number_input(f'{kind.title()} reference QD density [kg/m³]',min_value=100.,value=1020.,step=5.)
-        with st.expander('Design limits & thermal assumptions'):
+        with st.expander('Advanced: limits & temperature assumptions'):
             strict=st.checkbox('Enforce provisional assumptions as hard constraints',False)
             for key,label in [('rack_flow_max_LPM','Rack flow ceiling [L/min]'),('supply_max_C','Rack supply ceiling [°C]'),('return_max_C','Rack return ceiling [°C]'),('branch_outlet_max_C','Tray outlet ceiling [°C]'),('header_velocity_max_m_s','Header velocity ceiling [m/s]')]:
                 c['constraints'][key]=st.number_input(label,min_value=.1,value=float(c['constraints'][key]),step=.5)
