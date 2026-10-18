@@ -1,6 +1,6 @@
 {
   "config": {
-    "name": "Design E: minimum-head exact location balance at D geometry",
+    "name": "Fixed-page reference: switch Kh 180 million Pa/(kg/s)^2",
     "rack": {
       "compute_trays": 18,
       "switch_trays": 9,
@@ -103,107 +103,107 @@
       "overrides": {
         "C01": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0063351665909001185
+          "orifice_diameter_m": null
         },
         "C02": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006409915367443772
+          "orifice_diameter_m": null
         },
         "C03": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006483246038381632
+          "orifice_diameter_m": null
         },
         "C04": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0065547166358267015
+          "orifice_diameter_m": null
         },
         "C05": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006623845982654081
+          "orifice_diameter_m": null
         },
         "C06": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006690119272723017
+          "orifice_diameter_m": null
         },
         "C07": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006752997820495816
+          "orifice_diameter_m": null
         },
         "C08": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.006811934135287234
+          "orifice_diameter_m": null
         },
         "C09": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0068663933242271
+          "orifice_diameter_m": null
         },
         "S01": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017801868542356863
+          "orifice_diameter_m": 0.0017886736562900895
         },
         "S02": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017807389892963662
+          "orifice_diameter_m": 0.001788674446961283
         },
         "S03": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.001781271806114026
+          "orifice_diameter_m": 0.0017886752098744529
         },
         "S04": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017817855942845232
+          "orifice_diameter_m": 0.0017886759454568773
         },
         "S05": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.001782280648968229
+          "orifice_diameter_m": 0.0017886766541430877
         },
         "S06": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017827572707454994
+          "orifice_diameter_m": 0.0017886773363746703
         },
         "S07": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017832157654721775
+          "orifice_diameter_m": 0.0017886779926000772
         },
         "S08": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017836564441354
+          "orifice_diameter_m": 0.0017886786232744298
         },
         "S09": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0017840796227099637
+          "orifice_diameter_m": 0.0017886792288593302
         },
         "C10": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.007474679259856348
+          "orifice_diameter_m": null
         },
         "C11": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.007552138554614863
+          "orifice_diameter_m": null
         },
         "C12": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.00762558793679496
+          "orifice_diameter_m": null
         },
         "C13": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0076944697627383775
+          "orifice_diameter_m": null
         },
         "C14": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.007758256671723386
+          "orifice_diameter_m": null
         },
         "C15": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.007816570017088112
+          "orifice_diameter_m": null
         },
         "C16": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.00786958150568617
+          "orifice_diameter_m": null
         },
         "C17": {
           "restriction_K": 0.0,
-          "orifice_diameter_m": 0.0079197298547587
+          "orifice_diameter_m": null
         },
         "C18": {
           "restriction_K": 0.0,
@@ -387,6 +387,7 @@
     "plots": {
       "dpi": 180
     },
+    "balancing_mode": "resistance",
     "chip_temperature": {
       "GPU": {
         "resistance_range_K_W": [
@@ -412,8 +413,7 @@
         "target_max_C": 80.0,
         "manufacturer_limit_C": null
       }
-    },
-    "balancing_mode": "resistance"
+    }
   },
   "settings": {
     "service_events": [],

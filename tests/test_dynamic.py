@@ -272,3 +272,24 @@ def test_network_sizing_ignores_disconnected_demand(config,short):
     u=network_positions(p['config'],p['branches'],p['props'],target,conn,np.ones(n,dtype=bool),np.ones(n)*.5,short)
     assert u[0]==.5
     assert np.all(np.isfinite(u))
+
+
+def test_reference_freezes_requested_switch_resistance():
+    from pathlib import Path
+    from nvl72.dynamic.baseline import optimized_reference
+    from nvl72.orifices import coefficient
+    from nvl72.solver import solve
+    root=Path(__file__).resolve().parents[1]
+    c=load_config(root/'config/optimized_example.yaml')
+    c['branches']['switch']['restriction_K']=180e6
+    c['branches']['compute']['restriction_K']=0.
+    c['balancing_mode']='auto_equivalent'
+    reference=solve(c)
+    frozen=optimized_reference(root)
+    for tray in reference['trays']:
+        b=frozen['branches']['overrides'][tray['tray_id']]
+        assert b['restriction_K']==0
+        if tray['tray_type']=='compute':
+            assert b['orifice_diameter_m'] is None
+        else:
+            assert coefficient(b['orifice_diameter_m'],c['branches']['switch']['diameter_m'],tray['orifice_reference_density_kg_m3'])==pytest.approx(180e6)

@@ -38,12 +38,12 @@ def render(root):
     st.caption('1. Choose a workload → 2. Run comparison → 3. Read the result below.')
     st.caption('Engineering estimates. Tray temperatures and valve behavior need hardware validation.')
     revision=model_fingerprint(root)
-    options=['Optimized per-tray reference']
-    if 'dynamic_baseline_config' in st.session_state:options.insert(0,'Current fixed-page design — unchanged')
+    options=['Fixed-page reference — switch restriction 180']
+    if 'dynamic_baseline_config' in st.session_state:options.append('Current fixed-page design — unchanged')
     with st.sidebar:
         st.markdown('## Dynamic controls')
         st.caption('Choose a workload and run. Defaults are ready to use.')
-        selection=st.selectbox('Passive reference design',options,key='dynamic_reference',help='The optimized reference uses the existing analytical minimum-head location-balancing routine at fixed geometry. It is not a global geometry optimum. Imported designs are never automatically redesigned.')
+        selection=st.selectbox('Passive reference design',options,key='dynamic_reference',help='Default: the fixed-page two-class design at 120 L/min, with compute Kh=0 and switch Kh=180 million Pa/(kg/s)². Convert to fixed bores once; reuse them for all events. No per-tray reoptimization. Select Current to use an explicitly modified fixed-page design.')
         scenario=st.selectbox('Workload / service event',['rack_step','localized','remove_several','reinstall'],key='dynamic_scenario',format_func=lambda x:{'rack_step':'Heat spike — all compute trays to full load','localized':'Heat spike — selected compute group','remove_several':'Service — remove three compute trays','reinstall':'Service — remove and reconnect one tray'}[x],help='Identical heat and service schedules for both designs. Full load means the configured reference power, not a verified worst-case chip specification.')
         duration=st.number_input('Simulation duration · s',60.,3600.,300.,60.,key='dynamic_duration',help='Longer runs expose actuator travel and recovery behavior.')
         with st.expander('Control strategy & pump — advanced'):
@@ -65,6 +65,7 @@ def render(root):
     with st.sidebar.expander('Baseline, coolant and CDU details'):
         st.write(f"{c['name']} · {c['coolant']['type']} · {c['rack']['supply_C']} °C supply · {c['rack']['flow_LPM']} L/min design flow")
         st.caption('Export a fixed-orifice YAML from the original page to compare a saved design. This page freezes its bores for the full transient.')
+        st.caption('The switch setting 180 means 180 million Pa/(kg/s)², not 180 kPa. Its pressure drop is Kh × mass flow² and varies during the run.')
         upload=st.file_uploader('Import fixed design YAML',type=['yaml','yml'])
         if upload:
             try:

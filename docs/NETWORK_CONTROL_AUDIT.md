@@ -1,6 +1,6 @@
 # Network-balanced active control — October 18, 2026
 
-Reproduce with `python studies/audit_network_control.py`. Exact inputs and all metrics are exported to `results/network_control_audit/`. Tests use the existing optimized per-tray reference, a 300 s horizon, deterministic temperature measurements, the same demand-following pump for both designs, default 90 s actuators and all real modeled actuator/body losses. No heat loads, hardware penalties or thermal limits are reduced to favor active control.
+Reproduce with `python studies/audit_network_control.py`. Exact inputs and all metrics are exported to `results/network_control_audit/`. The current reference is the user's fixed-page design: 120 L/min, compute Kh=0, switch Kh=180 million Pa/(kg/s)², frozen to physical bores once without per-tray reoptimization. Tests use a 300 s horizon, deterministic temperature measurements, the same demand-following pump for both designs, default 90 s actuators and all modeled actuator/body losses. No heat loads, hardware penalties or thermal limits are reduced to favor active control.
 
 ## What changed and why
 
@@ -8,7 +8,11 @@ The old controller assumed unchanged local pressure while iteratively correcting
 
 The October 18 dimensionless orifice K refactor was algebraically equivalent to the previous law: it did not itself improve physical accuracy. Cd, thermal resistances, actuator characteristics and the pump curve still require calibration. The pump speed default is capped at 100%, replacing unsupported 120% overspeed.
 
-## Audited findings
+## Earlier controller audit — superseded baseline
+
+The numbers in this section describe the earlier per-tray-balanced reference. The current CSV and input JSON use the corrected two-class switch-180 reference; do not use the historical numbers as current outputs.
+
+Current corrected reference results: at dt=.5 s the rack spike gives fixed/active auxiliary power 287.07/98.35 W and solid peaks 69.653/68.639°C. At dt=1 s, remove-three gives 376.29/389.80 W (fixed selected), reconnect-one 383.54/400.48 W (both fail a thermal screen), and spike-plus-service 282.68/97.37 W (active selected). Localized spikes give 287.01/96.09 W but active increases peak pressure, so the strict selector retains fixed. The passive design is identical in every case and no per-scenario resizing occurs. The old figures below are preserved only as historical context.
 
 For the rack-wide compute pulse (30% to 100% at 100 s, lasting 40 s; switches stay at reference load), 0.5 s steps give:
 
