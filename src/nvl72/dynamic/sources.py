@@ -2,6 +2,8 @@
 from .settings import DEFAULTS,COSTS
 
 REFERENCES = {
+    'Permanent orifice loss': 'https://fluids.readthedocs.io/fluids.flow_meter.html#fluids.flow_meter.discharge_coefficient_to_K',
+    'DOE variable-speed pumping': 'https://www1.eere.energy.gov/manufacturing/tech_assistance/pdfs/variable_speed_pumping.pdf',
     'NVIDIA hardware': 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html',
     'NVIDIA DPS': 'https://docs.nvidia.com/datacenter/dps/versions/latest/guides/runbooks/maxlps-simple-mode-pilot.html',
     'OCP manifold': 'https://www.opencompute.org/documents/ocp-white-paper-rack-manifold-requirements-and-qualification-v3-pdf',
@@ -31,6 +33,7 @@ NOTES = {
     'valve_body_K': ('dimensionless', '.5–10', 'Additional full-open body loss, referenced to branch tube velocity.'),
     'correlation': ('fraction', '0–1', 'Probability of shared burst state, not an asserted Pearson correlation coefficient.'),
     'pump_efficiency': ('fraction', '.3–.8', 'Constant efficiency approximation; actual efficiency map unavailable.'),
+    'pump_max_speed': ('rated-speed fraction', '.2–1', 'Default limited to reference rated speed. Values above 1 are unverified overspeed experiments, not manufacturer capability.'),
     'target_rise_K': ('K', '8–20', 'Power-derived target flow uses this coolant temperature rise.'),
     'minimum_flow_fraction': ('fraction', '.05–.3', 'Minimum flow relative to frozen design flow, not a published cold-plate minimum.'),
 }

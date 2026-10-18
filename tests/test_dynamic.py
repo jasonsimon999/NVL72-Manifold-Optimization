@@ -92,7 +92,7 @@ def test_seed_and_liquid_fraction(config,short):
     np.testing.assert_allclose(r['fixed']['liquid_W'][:,0],.8*r['fixed']['electrical_W'][:,0])
 
 def test_finite_actuator_rate(config,short):
-    r=run_comparison(config,short)['active']
+    r=run_comparison(config,short)['active_candidate']
     assert np.max(abs(np.diff(r['opening'],axis=0)))<=short['dt_s']/short['valve_stroke_s']+1e-10
 
 def test_no_energy_saving_no_payback(short):
@@ -249,3 +249,26 @@ def test_service_overlay_does_not_multiply_power_twice():
     s=settings(scenario='reinstall',duration_s=40.,event_s=10.,reconnect_s=20.,reconnect_ramp_s=10.,service_events=[dict(tray=0,disconnect_s=10.,reconnect_s=20.,ramp_s=10.)])
     t,u,conn=generate(['compute','switch'],s)
     np.testing.assert_array_equal(u[:,0],conn[:,0])
+
+
+def test_network_sizing_closes_paths_at_target(config,short):
+    from nvl72.dynamic.hydraulic import network_positions
+    from nvl72.hydraulics import network_evaluator
+    p=prepare(config,short);n=len(p['ids']);connected=np.ones(n);controlled=np.ones(n,dtype=bool)
+    target=p['base_mass']*np.linspace(.65,1.,n)
+    opening=network_positions(p['config'],p['branches'],p['props'],target,connected,controlled,np.ones(n),short)
+    assert np.all((opening>0)&(opening<=1))
+    branches=valve_branches(p['branches'],opening,connected,p['props'][1].rho,controlled,short)
+    evaluate,_=network_evaluator(p['config'],branches,*p['props'])
+    sc,rc,loss,_,_=evaluate(target)
+    assert np.ptp(sc+rc+sum(loss.values()))<1e-6
+    assert np.max(opening)==pytest.approx(1.)
+
+
+def test_network_sizing_ignores_disconnected_demand(config,short):
+    from nvl72.dynamic.hydraulic import network_positions
+    p=prepare(config,short);n=len(p['ids']);conn=np.ones(n);conn[0]=0
+    target=p['base_mass'].copy();target[0]=0
+    u=network_positions(p['config'],p['branches'],p['props'],target,conn,np.ones(n,dtype=bool),np.ones(n)*.5,short)
+    assert u[0]==.5
+    assert np.all(np.isfinite(u))

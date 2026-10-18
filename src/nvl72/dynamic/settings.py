@@ -3,7 +3,7 @@ from copy import deepcopy
 
 DEFAULTS = {
     'service_events': [],
-    'duration_s': 300., 'dt_s': 2., 'seed': 72, 'scenario': 'heterogeneous',
+    'duration_s': 300., 'dt_s': 2., 'seed': 72, 'scenario': 'rack_step',
     'low_load': .3, 'high_load': 1., 'spike_s': 40., 'duty': .4,
     'correlation': .4, 'ramp_per_s': .2, 'localized_count': 4,
     'compute_power_scale': 1., 'switch_power_scale': 1.,
@@ -12,10 +12,9 @@ DEFAULTS = {
     'compute_R_K_W': .004, 'switch_R_K_W': .012,
     'coolant_C_J_K': 1200., 'chip_limit_C': 80., 'outlet_limit_C': 65.,
     'target_rise_K': 15., 'minimum_flow_fraction': .15,
-    # Optimized mode uses the measured flow target to choose an effective
-    # variable orifice area.  The comparison layer can still fall back to the
-    # fixed plate when that trial is not an improvement.
-    'controller': 'combined', 'control_s': 2., 'sensor_s': 2.,
+    # Optimized mode balances full network path losses at thermal flow demand.
+    # The comparison can select fixed hardware if the real active trial loses.
+    'controller': 'optimized', 'control_s': 2., 'sensor_s': 2.,
     'sensor_noise_K': .1, 'sensor_bias_K': 0., 'temperature_target_C': 72.,
     'kp_per_K': .025, 'ki_per_K_s': .0005, 'flow_gain': .3,
     'valve_min_area_fraction': .015, 'valve_max_bore_fraction': .95,
@@ -24,7 +23,7 @@ DEFAULTS = {
     'valve_running_W': 1.5, 'valve_holding_W': .4, 'electronics_W': 5.,
     'fail_position': 1., 'controlled_branches': 27,
     'pump_mode': 'demand', 'pump_tau_s': 10., 'pump_min_speed': .2,
-    'pump_max_speed': 1.2, 'pump_efficiency': .6, 'pump_enabled': True,
+    'pump_max_speed': 1.0, 'pump_efficiency': .6, 'pump_enabled': True,
     'coldplate_scale': 1., 'qd_scale': 1., 'header_scale': 1.,
     'supply_offset_K': 0., 'design_flow_scale': 1.,
     'event_s': 100., 'reconnect_s': 200., 'reconnect_ramp_s': 20.,

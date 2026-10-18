@@ -93,3 +93,33 @@ def size_positions(branches, opening, mass, target, rho, s):
         u=((bore/maximum)**2-s['valve_min_area_fraction'])/(1-s['valve_min_area_fraction'])
         result.append(np.clip(u,0,1))
     return np.asarray(result)
+
+
+def network_positions(c, base, props, target, connected, controlled, opening, s):
+    """Balance complete paths at specified demand with minimum required rack head.
+
+    Evaluate all paths with controlled valves fully open. The highest path
+    loss sets the common head; add only the resistance needed on other paths.
+    This is a steady target allocation, not a transient/global optimum. Fixed
+    branches and actuator bounds can prevent exact tracking; the actual pump
+    and finite-speed actuators are still solved independently at every step.
+    """
+    ps, pb, pr = props
+    target = np.asarray(target)
+    live = (np.asarray(connected)>0)&(target>0)
+    if not live.any(): return opening.copy()
+    full = valve_branches(base,np.ones(len(base)),connected,pb.rho,controlled,s)
+    evaluate,_ = network_evaluator(c,full,ps,pb,pr)
+    sc,rc,loss,_,_ = evaluate(target)
+    paths = sc+rc+sum(loss.values())
+    head = max(0.,float(np.max(paths[live])))
+    result = opening.copy()
+    for i,b in enumerate(full):
+        if not (live[i] and controlled[i]): continue
+        pipe=b['diameter_m']; maximum=pipe*s['valve_max_bore_fraction']
+        kh=coefficient(maximum,pipe,float(pb.rho[i]),s['valve_Cd'])
+        kh+=max(0.,head-paths[i])/target[i]**2
+        bore=bore_from_coefficient(kh,pipe,float(pb.rho[i]),s['valve_Cd'])
+        fraction=(bore/maximum)**2
+        result[i]=np.clip((fraction-s['valve_min_area_fraction'])/(1-s['valve_min_area_fraction']),0,1)
+    return result

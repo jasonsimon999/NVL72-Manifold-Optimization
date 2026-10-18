@@ -44,10 +44,10 @@ def render(root):
         st.markdown('## Dynamic controls')
         st.caption('Choose a workload and run. Defaults are ready to use.')
         selection=st.selectbox('Passive reference design',options,key='dynamic_reference',help='The optimized reference uses the existing analytical minimum-head location-balancing routine at fixed geometry. It is not a global geometry optimum. Imported designs are never automatically redesigned.')
-        scenario=st.selectbox('Workload / service event',SCENARIOS,index=3,key='dynamic_scenario',format_func=lambda x:x.replace('_',' ').title(),help='The same generated electrical workload is applied to the fixed and active trials.')
+        scenario=st.selectbox('Workload / service event',['rack_step','localized','remove_several','reinstall'],key='dynamic_scenario',format_func=lambda x:{'rack_step':'Heat spike — all compute trays to full load','localized':'Heat spike — selected compute group','remove_several':'Service — remove three compute trays','reinstall':'Service — remove and reconnect one tray'}[x],help='Identical heat and service schedules for both designs. Full load means the configured reference power, not a verified worst-case chip specification.')
         duration=st.number_input('Simulation duration · s',60.,3600.,300.,60.,key='dynamic_duration',help='Longer runs expose actuator travel and recovery behavior.')
         with st.expander('Control strategy & pump — advanced'):
-            controller=st.selectbox('Active control strategy',['optimized','combined','feedforward','reactive'],index=0,key='dynamic_controller',format_func=lambda x:{'optimized':'Adaptive sizing + fixed-design comparison','combined':'Power + temperature feedback','feedforward':'Power target + flow tracking','reactive':'Temperature PI'}[x],help='Adaptive sizing inverts the hydraulic loss equation for each branch flow target; the comparison automatically falls back to fixed hardware if it is not better.')
+            controller=st.selectbox('Active control strategy',['optimized','combined','feedforward','reactive'],index=0,key='dynamic_controller',format_func=lambda x:{'optimized':'Network-balanced diameter control','combined':'Power + temperature feedback','feedforward':'Power target + flow tracking','reactive':'Temperature PI'}[x],help='Evaluate every full-open path at target flows, then add the resistance needed to balance all paths. Real actuator response and pump limits remain. Fixed hardware is retained if no qualifying improvement is found.')
             pump=st.selectbox('Pump control — same for both designs',['demand','constant_speed','constant_dp'],key='dynamic_pump',format_func=lambda x:{'demand':'Demand-following variable speed','constant_speed':'Constant speed','constant_dp':'Constant differential pressure'}[x],help='Both designs use the same pump policy. This is a coupled network solve, not an assumed pump-power ratio.')
         with st.expander('Energy prices & hardware costs'):
             price=st.number_input('Electricity · $/kWh',0.,5.,.12,.01,key='dynamic_price')
@@ -77,10 +77,15 @@ def render(root):
     with st.sidebar, st.form('dynamic_configuration'):
         submitted=st.form_submit_button('Run fixed vs active comparison',type='primary',use_container_width=True)
         s=dict(deepcopy(DEFAULTS),scenario=scenario,controller=controller,pump_mode=pump,duration_s=duration,electricity_per_kWh=price,cost_case=cost_case)
+        with st.expander('Heat spike / service timing',expanded=True):
+            s['event_s']=st.number_input('Event starts · s',min_value=0.,value=min(100.,duration/3),key='dynamic_event_s')
+            s['spike_s']=st.number_input('Heat spike lasts · s',min_value=1.,value=40.,key='dynamic_spike_s')
+            s['reconnect_s']=st.number_input('Preset tray returns · s',min_value=0.,value=min(200.,duration*2/3),key='dynamic_reconnect_s')
+            st.caption('Spikes raise compute heat from 30% to 100% of configured reference load. Switch heat stays at reference. Choose individual service trays above to combine servicing with either spike.')
         with st.expander('Advanced simulation settings'):
             st.caption('All settings are available here. Fractions run from 0 to 1. Use smaller timesteps to check transient accuracy. The motorized actuator default takes 90 s for a full stroke; faster valves must be justified separately.')
             groups={
-                'Workload & maintenance':['low_load','high_load','spike_s','duty','correlation','ramp_per_s','localized_count','seed','event_s','reconnect_s','reconnect_ramp_s'],
+                'Workload & maintenance':['low_load','high_load','localized_count','seed','reconnect_ramp_s'],
                 'Thermal assumptions':['compute_power_scale','switch_power_scale','compute_liquid_fraction','switch_liquid_fraction','compute_C_J_K','switch_C_J_K','compute_R_K_W','switch_R_K_W','coolant_C_J_K','chip_limit_C','outlet_limit_C','target_rise_K','minimum_flow_fraction','supply_offset_K'],
                 'Valves & controls':['valve_min_area_fraction','valve_max_bore_fraction','valve_Cd','valve_body_K','valve_tau_s','valve_stroke_s','valve_deadband','valve_running_W','valve_holding_W','electronics_W','fail_position','controlled_branches','temperature_target_C','kp_per_K','ki_per_K_s','flow_gain','control_s','sensor_s','sensor_noise_K','sensor_bias_K'],
                 'Hydraulics & numerical settings':['coldplate_scale','qd_scale','header_scale','design_flow_scale','pump_tau_s','pump_min_speed','pump_max_speed','pump_efficiency','dt_s'],
@@ -189,10 +194,12 @@ def render(root):
     st.subheader('Did active cooling help?')
     peak_gain=base['peak_chip_C']-raw['peak_chip_C'];mean_gain=base['mean_chip_C']-raw['mean_chip_C']
     st.write(f"Raw active trial: peak tray temperature is {peak_gain:+.2f} °C cooler; mean tray temperature is {mean_gain:+.2f} °C cooler. Positive values are reductions; negative values mean hotter.")
+    net_gain=base['average_aux_W']-raw['average_aux_W']
+    st.write(f"Actual active hardware saves {net_gain:+.1f} W including pump, valves and controls. Thermal screen: {'pass' if raw['thermal_pass'] else 'FAIL'}. A warmer average can accompany energy savings; it is not an improvement in every temperature.")
     st.caption(f"Time above the solid limit: fixed {base['time_above_limit_s']:.0f} s; active {raw['time_above_limit_s']:.0f} s. Mean temperature covers connected trays and sampled times; it is not a chip-throughput prediction.")
     if raw.get('thermal_target_unreachable'):
         st.warning('Some loads cannot meet the controller setpoint at any finite flow under the entered thermal resistance and inlet temperature. Change those assumptions or reduce heat; a larger bore alone cannot meet that target.')
-    with st.expander('Compare all candidates — detailed results'):
+    with st.expander('Fixed vs actual active vs held valves',expanded=True):
         st.subheader('What the active hardware actually did')
         trial=r.get('active_candidate',r['active']);held=r.get('held_active')
         comparison={'Fixed':r['fixed'],'Adaptive trial':trial,'Selected design':r['active']}
@@ -317,6 +324,8 @@ $\dot m_{target}=\max(P_{liquid}/(c_p\Delta T_{allow}),\dot m_{minimum})$.
 Flow error is $(\dot m_i-\dot m_{target,i})/\dot m_{target,i}$; disconnected branches are excluded.
 Temperature PI opens on positive $T_{measured}-T_{target}$ with anti-windup.
 Feed-forward uses power-derived demand plus flow tracking; combined control adds temperature correction.
+Optimized control evaluates full-open path losses at demand, sets common head to the maximum path loss,
+and inverts the added resistance needed on each easier path. Finite valve motion and the same pump feedback apply to both designs.
 
 ### Pumping and economics
 $P_{hyd}=\Delta p\,Q$; $P_{electric}=P_{hyd}/\eta$; $E=\sum P\Delta t$.
@@ -339,7 +348,7 @@ def render_equations():
         ('Pump and loop pressure',r'\Delta p_{pump}=p_0N^2-aQ^2=\Delta p_{external}+\Delta p_{supply,i}+\Delta p_{branch,i}+\Delta p_{return,i}', 'The pump curve and every open branch must agree at the same operating point.'),
         ('Effective bore',r'd=D_{max}\sqrt{f_{min}+(1-f_{min})u}', 'Opening u controls area; diameter follows its square root.'),
         ('Permanent orifice loss',r'K(d/D)=\left[\frac{\sqrt{1-\beta^4(1-C_d^2)}-C_d\beta^2}{C_d}\right]^2,\quad \Delta p_o=K\frac{\rho v_o^2}{2},\quad\beta=d/D', 'The dimensionless loss coefficient changes with bore-to-branch diameter ratio. This same pressure-recovery relation and exact inverse are shared with the fixed model. Cd requires calibration.'),
-        ('Diameter sizing feedback',r'K_{o,new}=K_{o,current}\left(\frac{\dot m_{actual}}{\dot m_{target}}\right)^2', 'Invert the permanent-loss equation to find bore, bound it to the valve range, apply actuator lag, then solve the coupled network again. Local pressure is assumed fixed only during this sizing step.'),
+        ('Network-balanced diameter control',r'H^*=\max_i L_i^{open}(\dot{\mathbf m}^{*}),\qquad k_{o,i}^{*}=k_{o,i}^{open}+\frac{H^*-L_i^{open}}{(\dot m_i^{*})^2}', 'Evaluate complete supply–tray–return paths at target flows with active valves fully open, including body losses and service QDs. Balance shorter paths to the largest loss, then invert resistance to bore. This gives minimum head for prescribed targets when all paths are controllable and bounds permit. It is not a global transient energy optimum.'),
         ('Thermal demand',r'\begin{aligned}\Delta T_{allow}&=\min(\Delta T_{target},T_{out,limit}-T_{in},T_{set}-T_{in}-RP)\\\dot m_{target}&=\max\left(\frac{P}{c_p\Delta T_{allow}},\dot m_{minimum}\right)\end{aligned}', 'Shared thermal flow target for both designs; includes coolant and solid temperature goals. Nonpositive available rise is flagged as unreachable and uses the original coolant-rise demand. Disconnected trays have zero demand.'),
         ('Solid heat storage',r'C_s\frac{dT_s}{dt}=P_{liquid}-\frac{T_s-T_f}{R}', 'Tray power heats the solid; the thermal resistance transfers heat to coolant.'),
         ('Coolant heat storage',r'C_f\frac{dT_f}{dt}=\frac{T_s-T_f}{R}-\dot m c_p(T_f-T_{in})', 'Heat entering coolant is either stored locally or carried out by flow.'),

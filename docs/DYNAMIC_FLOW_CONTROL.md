@@ -1,5 +1,19 @@
 # Dynamic flow control: implementation and engineering basis
 
+## Current controller — October 18, 2026
+
+The default `optimized` strategy now uses **network pressure balancing**, replacing the old local `k_new = k_current (m_actual/m_target)^2` update. See `NETWORK_CONTROL_AUDIT.md` for the current reproducible results; older audit outcomes describe the earlier controller.
+
+At each control sample, derive per-tray mass-flow demand from the steady thermal balance:
+`deltaT_allow = min(target_rise, outlet_limit - Tin, solid_setpoint - Tin - R P)` and
+`m_target = max(P/(cp deltaT_allow), minimum_flow)`. Nonpositive available temperature rise is explicitly unreachable; it uses the configured coolant-rise fallback, never an infinite flow command. Disconnected demand is zero. Positive measured temperature error adds a bounded target trim.
+
+At that target vector, evaluate every full-open supply–tray–return path including valve body and reconnecting QD losses. Let `L_open_i` be its pressure loss and `H_target = max(L_open_i)` over connected trays. Then set dimensional orifice resistance to `k_i = k_open_i + (H_target - L_open_i)/m_target_i^2`. Invert the shared permanent-loss law to a bore, map it to valve position, and enforce limits, lag, stroke rate and deadband. This exactly balances the target vector when all branches are controllable and bounds permit. It minimizes the head required for those prescribed targets, not energy over all possible trajectories. The full hydraulic solve determines actual flows after actuator motion, and the same demand-following pump controller applies to passive and active hardware. Default maximum speed is now 1.0 of reference rated speed; higher speeds require hardware evidence.
+
+The main interface contains four deterministic tests: full compute spike, localized compute spike, removal of three compute trays, and removal/reconnection of one tray. Independent tray schedules can be overlaid. Full load is the configured reference load, not a manufacturer-certified maximum or exhaustive worst-case search. Historical synthetic scenarios remain available to study scripts.
+
+The selected design is still an offline comparison of fixed, real active and held-active hardware. Active must pass thermal/numerical checks, reduce the weighted score, and not worsen the six protected summary metrics (peak solid/outlet temperature, auxiliary power, peak head, RMS/worst flow error). Mean temperature, capital cost and every instantaneous value are not guaranteed to improve. Fixed selection does not make an installed valve lossless, and a failing fixed baseline remains failing. Inspect the raw active comparison and facility screens.
+
 The new **Dynamic Flow Control** page is separate from the fixed-orifice dashboard. Start the existing app with `python run_app.py`, then select **Dynamic Flow Control** in the sidebar. The same `dashboard.py` entrypoint works on Streamlit Cloud. Commit the new `pages/` directory and `src/nvl72/dynamic/` package with the app; no new dependencies are required.
 
 ## Baseline and fair comparison

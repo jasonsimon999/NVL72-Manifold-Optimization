@@ -95,9 +95,9 @@ def simulate(prepared, s, controller='fixed'):
             next_sensor=time+s['sensor_s']
         if active and controller!='hold' and time+1e-8>=next_control:
             if controller=='optimized':
-                from .hydraulic import size_positions
+                from .hydraulic import network_positions
                 sizing_target=target*(1+np.clip(s['kp_per_K']*(measured-s['temperature_target_C']),0.,1.))
-                target_open=size_positions(p['branches'],opening,mass,sizing_target,pb.rho,s)
+                target_open=network_positions(c,p['branches'],p['props'],sizing_target,conn,controlled,opening,s)
             else:
                 target_open,integral=command(controller,opening,measured,mass,target,integral,s,s['control_s'])
             next_control=time+s['control_s']
@@ -239,7 +239,7 @@ def run_comparison(config, s=None):
                  savings_percent_IT=100*net/f['average_IT_W'] if f['average_IT_W']>0 else None,
                  peak_temperature_reduction_K=f['peak_chip_C']-a['peak_chip_C'])
     facility={}
-    for name,result in [('fixed',fixed),('active',active)]:
+    for name,result in [('fixed',fixed),('active',active),('active_trial',adaptive_trial)]:
         max_removed=float(result['removed_W'].sum(axis=1).max())
         rating=p['reference']['facility']['HX_available_W_per_rack']
         facility[name]=dict(peak_rejected_heat_W=max_removed,reference_HX_available_W=rating,
