@@ -83,6 +83,16 @@ def test_pump_analytical(cfg):
     d2=deepcopy(d); d2['speed']=.7
     assert pump_head(.7*q,d2)==pytest.approx(.49*pump_head(q,d))
 
+def test_orifice_dimensionless_K_matches_mass_coefficient_and_varies_with_bore():
+    from nvl72.orifices import coefficient,loss_coefficient,bore_from_coefficient
+    rho=1015.;pipe=.008;cd=.62
+    small,large=.0025,.006
+    assert loss_coefficient(small,pipe,cd)>loss_coefficient(large,pipe,cd)>0
+    area=np.pi*small**2/4
+    kh=coefficient(small,pipe,rho,cd)
+    assert kh==pytest.approx(loss_coefficient(small,pipe,cd)/(2*rho*area**2))
+    assert bore_from_coefficient(kh,pipe,rho,cd)==pytest.approx(small)
+
 def test_gravity_cancellation(cfg):
     cfg['power']['tray_heat_W']=[0.]*27
     a=solve(cfg); cfg['rack']['gravity_enabled']=False; b=solve(cfg)

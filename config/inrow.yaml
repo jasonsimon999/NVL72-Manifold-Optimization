@@ -4,11 +4,11 @@ rack: {supply_C: 38}
 external: {enabled: true}
 cdu:
   mode: in_row
-  reference: Vertiv XDU1350-like two pumps / eight identical racks
+  reference: Vertiv Liebert XDU1350, published two-pump duty / eight identical racks
   capacity_W: 1368000
   nominal_flow_LPM: 1200
   available_dp_Pa: 244000
-  shutoff_dp_Pa: 330000
+  shutoff_dp_Pa: 330000  # ASSUMPTION: Vertiv publishes the rated duty point, not the full pump curve
   served_racks: 8
   secondary_min_C: 10
   secondary_max_C: 52

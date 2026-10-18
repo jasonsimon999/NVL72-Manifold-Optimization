@@ -16,7 +16,7 @@ from .facility import facility_check
 from .coldplate import channel_model
 from .design_analysis import chip_estimates, CHIP_DEFAULTS
 from .constraint_policy import apply_policy
-from .orifices import bore_from_coefficient
+from .orifices import bore_from_coefficient,loss_coefficient
 from .quick_disconnect import velocity as qdc_velocity
 from .units import c_to_k,k_to_c,lpm_to_m3s,m3s_to_lpm
 
@@ -153,6 +153,8 @@ def solve(c: dict) -> dict:
         tray['orifice_reference_density_kg_m3']=density
         tray['balancing_restriction_K']=branches[i]['restriction_K']
         tray['orifice_Cd']=branches[i].get('orifice_Cd',.62)
+        tray['orifice_loss_K']=None if bore is None else loss_coefficient(
+            bore,branches[i]['diameter_m'],tray['orifice_Cd'])
         tray['orifice_dP_kPa']=float(hp.branch_losses['orifices'][i]/1000)
     chips=chip_estimates(c,trays)
     add('chip_assumed_target',min(x['target_margin_K'] for x in chips),20,'K')

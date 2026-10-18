@@ -155,10 +155,10 @@ with hydraulics:
     st.pyplot(charts.budget_figure(result['pressure_budget_Pa']),use_container_width=True)
     st.caption('Flow-weighted complete-path contributions. Parallel branches are not summed; signed buoyancy may reduce head.')
     st.subheader('Branch, QD and orifice dimensions')
-    fields=['tray_id','branch_ID_mm','QD_ID_mm','orifice_diameter_mm','actual_flow_LPM','branch_velocity_m_s','QD_velocity_m_s','qdc_dP_kPa','orifice_dP_kPa','QD_loss_model']
-    labels={'tray_id':'Tray','branch_ID_mm':'Branch ID · mm','QD_ID_mm':'QD bore · mm','orifice_diameter_mm':'Orifice bore · mm','actual_flow_LPM':'Flow · L/min','branch_velocity_m_s':'Tube speed · m/s','QD_velocity_m_s':'QD speed · m/s','qdc_dP_kPa':'QD loss · kPa','orifice_dP_kPa':'Orifice loss · kPa','QD_loss_model':'QD model'}
+    fields=['tray_id','branch_ID_mm','QD_ID_mm','orifice_diameter_mm','orifice_loss_K','actual_flow_LPM','branch_velocity_m_s','QD_velocity_m_s','qdc_dP_kPa','orifice_dP_kPa','QD_loss_model']
+    labels={'tray_id':'Tray','branch_ID_mm':'Branch ID · mm','QD_ID_mm':'QD bore · mm','orifice_diameter_mm':'Orifice bore · mm','orifice_loss_K':'Orifice K · –','actual_flow_LPM':'Flow · L/min','branch_velocity_m_s':'Tube speed · m/s','QD_velocity_m_s':'QD speed · m/s','qdc_dP_kPa':'QD loss · kPa','orifice_dP_kPa':'Orifice loss · kPa','QD_loss_model':'QD model'}
     st.dataframe(df[[x for x in fields if x in df]].rename(columns=labels),hide_index=True,width='stretch')
-    st.caption('All diameters are bores in mm. QD loss covers the complete assumed QD path. Blank orifice bore means no plate.')
+    st.caption('All diameters are bores in mm. Orifice K is dimensionless, based on bore velocity, and varies with bore/branch diameter ratio. QD loss covers the complete assumed QD path. Blank orifice bore means no plate.')
     if result.get('fixed_orifice_config'):
         with st.expander('Automatic sizing details'):
             st.dataframe(df[['tray_id','balancing_restriction_K','orifice_diameter_mm','orifice_Cd','orifice_reference_density_kg_m3','orifice_dP_kPa']],hide_index=True,width='stretch')

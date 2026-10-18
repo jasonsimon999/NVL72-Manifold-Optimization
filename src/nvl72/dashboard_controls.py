@@ -49,7 +49,10 @@ def controls(root,base):
             if operating=='pump':st.info('Pump mode: the displayed result is the flow the assumed pump can deliver. The rack-flow slider does not prescribe that result.')
         with st.expander('Facility & CDU'):
             st.caption('The CDU transfers rack heat to facility water. These settings describe the separate building-water loop and the selected cooling unit.')
-            cdu=st.selectbox('CDU',['in_rack','in_row'],key='cdu')
+            cdu=st.selectbox('CDU',['in_rack','in_row'],key='cdu',format_func=lambda x:{
+                'in_rack':'Vertiv CoolChip CDU 121 — single-rack screening curve',
+                'in_row':'Vertiv Liebert XDU1350 — 8-rack, two-pump duty point'}[x],
+                help='The XDU1350 option supplies a verified 244 kPa external differential pressure at 1,200 L/min aggregate flow. Its full curve still needs vendor data.')
             c=load_config(root/'config/inrow.yaml') if cdu=='in_row' else deepcopy(base)
             racks=st.number_input('Racks served by CDU',1,32,1 if cdu=='in_rack' else 8,1)
             fw_supply=st.number_input('Facility water supply [°C]',5.,60.,36.,.5)
@@ -59,7 +62,7 @@ def controls(root,base):
             fw_ceiling=st.number_input('Facility return ceiling [°C]',10.,90.,60.,1.)
             capacity=st.number_input('Available facility duty [kW; 0 unknown]',min_value=0.,value=0.,step=100.)
             ua=st.number_input('Evaluated HX UA [kW/K; 0 unknown]',min_value=0.,value=0.,step=1.)
-            st.caption('Flow and duty apply to this CDU. More facility flow does not directly increase rack flow.')
+            st.caption('Flow and duty apply to this CDU. More facility flow does not directly increase rack flow. The XDU1350 option increases the available pressure envelope; it does not improve numerical convergence.')
         with st.expander('Advanced: component losses & taper'):
             st.caption('Use component data here when available. Taper reduces header size toward the tip; Cd describes how the orifice passes flow; Kh describes pressure loss.')
             taper=st.slider('Tip / main diameter ratio',.4,1.,1.,.01)
